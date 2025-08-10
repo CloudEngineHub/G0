@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Galaxea G0: Open-World Dataset and Dual-System VLA Model">
+  <meta name="keywords" content="Galaxea, Robotics, Embodied AI">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Galaxea G0: Open-World Dataset and Dual-System VLA Model</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script> -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="https://galaxea-ai.com/cn">
+        <img src="./static/images/logo.png" alt="Logo" style="height: 28px; width: auto;">
+      <!-- <span class="icon">
+          <i class="fas fa-home"></i>
+      </span> -->
+      </a>
+
+      
+      <!-- <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More Research
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="https://hypernerf.github.io">
+            HyperNeRF
+          </a>
+          <a class="navbar-item" href="https://nerfies.github.io">
+            Nerfies
+          </a>
+          <a class="navbar-item" href="https://latentfusion.github.io">
+            LatentFusion
+          </a>
+          <a class="navbar-item" href="https://photoshape.github.io">
+            PhotoShape
+          </a>
+        </div> -->
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Galaxea G0: Open-World Dataset and Dual-System VLA Model</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://github.com/OpenGalaxea">Galaxea Team</a></span>
+            <!-- <span class="author-block">
+              <a href="https://utkarshsinha.com">Utkarsh Sinha</a><sup>2</sup>,</span>
+            <span class="author-block">
+              <a href="https://jonbarron.info">Jonathan T. Barron</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="http://sofienbouaziz.com">Sofien Bouaziz</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://www.danbgoldman.com">Dan B Goldman</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://homes.cs.washington.edu/~seitz/">Steven M. Seitz</a><sup>1,2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="http://www.ricardomartinbrualla.com">Ricardo Martin-Brualla</a><sup>2</sup>
+            </span> -->
+          </div>
+          
+          <!-- <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>GalaXea</span>
+            <span class="author-block"><sup>2</sup>Google Research</span>
+          </div> -->
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="https://github.com/OpenGalaxea/G0"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- arxiv Link. -->
+              <!-- <span class="link-block">
+                <a href="https://arxiv.org/abs/2011.12948"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span> -->
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://github.com/OpenGalaxea/G0"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/OpenGalaxea/G0"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+              <!-- Dataset Link. -->
+              <span class="link-block">
+                <a href="https://github.com/OpenGalaxea/G0"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="far fa-images"></i>
+                  </span>
+                  <span>Data</span>
+                  </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <!-- <img id="teaser" autoplay muted loop playsinline height="100%">
+        <source src="./static/images/Teaser.png">
+      </video> -->
+      <figure class="image">
+        <img src="./static/images/Teaser.png" alt="static Teaser" style="max-width: 1200px; margin: auto;">
+      </figure>
+      <h3 class="subtitle has-text-centered">
+        We introduce Galaxea Open-World Dataset, a high-quality robot behavior dataset collected in the open world. 
+        G0 is our dual-system VLA model pre-trained upon the dataset.
+      </h3>
+    </div>
+  </div>
+</section>
+
+
+<!-- <section class="hero is-light is-small">
+  <div class="hero-body">
+    <div class="container">
+      <div id="results-carousel" class="carousel results-carousel">
+        <div class="item item-steve">
+          <video poster="" id="steve" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/steve.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-chair-tp">
+          <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/chair-tp.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-shiba">
+          <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/shiba.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-fullbody">
+          <video poster="" id="fullbody" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/fullbody.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-blueshirt">
+          <video poster="" id="blueshirt" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/blueshirt.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-mask">
+          <video poster="" id="mask" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/mask.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-coffee">
+          <video poster="" id="coffee" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/coffee.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-toby">
+          <video poster="" id="toby" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/toby2.mp4"
+                    type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</section> -->
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            We introduce GalaXea Open-World Dataset, a large-scale and diverse robot behavior dataset collected 
+            in authentic human living and working spaces. All data are captured with a uniform robotic embodiment, 
+            with precise subtask language annotations to support training and evaluation.
+          </p>
+          <p>
+            We further present G0, a dual system that integrates a Vision-Language Model (VLM) for multimodal 
+            planning with a Vision-Language-Action (VLA) model for precise execution, trained via a three-stage 
+            curriculum: cross-embodiment pre-training, single-embodiment pre-training, and task-specific post-training.
+            A benchmark covering tabletop manipulation, few-shot learning and long-horizon mobile manipulation 
+            demonstrates the effectiveness of the dataset and the training paradigm.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+    <!-- Paper video. -->
+    <!-- <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Video</h2>
+        <div class="publication-video">
+          <iframe src="https://www.youtube.com/embed/MrKrnHhk8IA?rel=0&amp;showinfo=0"
+                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div> -->
+    <!--/ Paper video. -->
+  </div>
+</section>
+
+<!-- Dataset -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column">
+        <h2 class="title is-3">Dataset</h2>
+      </div>
+    </div>
+
+    <div class="columns is-centered">
+
+      <div class="column is-two-fifths">
+        <div class="content">
+          <h3 class="title is-4">Hardware Platform</h3>
+          <p>
+            Our robot platform Galaxea R1 Lite is a mobile dual-arm manipulator designed for 
+            daily tasks that demand high mobility, extended end-effector reachability, 
+            and efficient whole-body teleoperation.
+          </p>
+          <figure class="image">
+            <img src="./static/images/r1lite.png" alt="r1lite robot image" style="max-width: 600px; margin: auto;">
+          </figure>
+        </div>
+      </div>
+      
+      <div class="column is-three-fifths">
+        <h3 class="title is-4">Data Samples</h3>
+        <div class="columns is-centered">
+          <div class="column content">
+            <p>
+              The dataset is collected at 11 physical sites—covering residential, catering, retail, and office spaces. 
+              Objects and tasks are defined by the scenes.
+            </p>
+            <figure class="image">
+              <img src="./static/images/data_samples.jpg" alt="dataset samples" style="max-width: 1200px; margin: auto;">
+            </figure>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div>
+        <h3 class="title is-4">Statistics</h3>
+        <div class="content has-text-justified">
+          <p>
+            Dataset Statistics of Galaxea Open-World Dataset, including the distribution of skills, locations, trajectory lengths
+            and manipulated objects.
+          </p>
+        </div>
+        <div class="columns is-vcentered">
+
+          <div class="column is-one-third">
+            <figure class="image">
+              <img src="./static/images/scenes.jpg" alt="scenes distribution" style="width: 100%; display: block; margin: auto;">
+            </figure>
+          </div>
+        
+          <div class="column is-two-thirds">
+            <figure class="image">
+              <img src="./static/images/objects.jpg" alt="objects distribution" style="width: 90%; display: block; margin: auto;">
+            </figure>
+          </div>
+        </div>
+
+        <div class="columns is-vcentered">
+
+          <div class="column">
+            <figure class="image">
+              <img src="./static/images/complexity.jpeg" alt="complexity distribution" style="width: 80%; display: block; margin: auto;">
+            </figure>
+          </div>
+        
+          <div class="column">
+            <figure class="image">
+               <img src="./static/images/time.jpeg" alt="lengths distribution" style="width: 90%; display: block; margin: auto;">
+            </figure>
+          </div>
+        </div>
+
+        <div class="columns is-vcentered">
+
+          <div class="column is-one-fifth">
+            <figure class="image">
+              <img src="./static/images/Body_Part.jpg" alt="Body Part distribution" style="width: 100%; display: block; margin: auto;">
+            </figure>
+          </div>
+        
+          <div class="column is-four-fifths">
+            <figure class="image">
+               <img src="./static/images/skills.jpg" alt="lengths distribution" style="width: 80%; display: block; margin: auto;">
+            </figure>
+          </div>
+        </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- Model -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column">
+        <h2 class="title is-3">G0 Model</h2>
+      </div>
+    </div>
+
+    <h3 class="title is-4">VLA Pre-training</h3>
+      <div class="content has-text-justified">
+        <p>
+          G0-VLA architecture and training pipeline. Stage 1 pre-trains a vision-language model on
+          cross-embodiment data in an autoregressive manner. Stage 2 and post-train share the same model
+          structure, trained on Galaxea open-world data with embodiment-specific views and high-level and
+          subtask instructions, by supervising the Action Transformer’s action reconstruction with a flow-
+          matching loss.
+        </p>
+      </div>
+      <div class="content has-text-centered">
+        <figure class="image">
+          <img src="./static/images/vla_model.jpg" alt="VLA architecture">
+        </figure>
+      </div>
+
+    <div>
+      <h3 class="title is-4">Benchmarking Pre-training</h3>
+      <div class="content has-text-justified">
+        <p>
+          <b>Fine-tuning benchmark results of different pre-trained VLAs.</b> G0 (Full) achieves the
+          highest average progress score, excelling in object-picking tasks such as Table Bussing, Microwave
+          Operation, and Bed Making. G0 (Stage-2) lead in language following, action consistency, and
+          whole-body control. G0 (Stage-1) performs the worst among pre-trained models, highlighting the
+          necessity of uniform-embodiment pre-training.
+        </p>
+      </div>
+      <div class="content has-text-centered">
+        <figure class="image">
+          <img src="./static/images/table1.png" alt="Benchmarking Pre-training">
+        </figure>
+      </div>
+    </div>
+
+    <br>
+    <div>
+      <h3 class="title is-4">Few-shot Transfer</h3>
+      <div class="content has-text-justified">
+        <p>
+          <b>Few-shot performance of VLAs. </b>Few-shot transfer performance on Table Bussing
+          and Microwave Operation. Stage-2 pre-training markedly improves success rates and execution
+          smoothness, while Stage-1 pre-training alone offers no clear advantage over training from scratch.
+        </p>
+      </div>
+      <div class="content has-text-centered">
+        <figure class="image">
+          <img src="./static/images/table2.png" alt="Few-shot Transfer">
+        </figure>
+      </div>
+    </div>
+
+    <br>
+    <div>
+      <h3 class="title is-4">Embodiment-specific Actions</h3>
+      <div class="content has-text-justified">
+        <p>
+          <b>Per-skill progress scores on the Bed Making task.</b> Stage-2 single-embodiment pre-
+          training substantially improves chassis, torso control, while cross-embodiment pre-training (Stage-1,
+          π0) yields weaker performance, in some cases worse than training from scratch.
+        </p>
+      </div>
+      <div class="content has-text-centered">
+        <figure class="image">
+          <img src="./static/images/table3.png" alt="Embodiment-specific Actions">
+        </figure>
+      </div>
+    </div>
+
+    <br>
+    <div>
+      <h3 class="title is-4">G0-VLM: Task Planner</h3>
+      <div class="content has-text-justified">
+        <p>
+          <b>Instruction accuracy in benchmark tasks (%).</b> G0-VLM serves as the task planner, processing human instructions and
+          environmental observations to generate executable commands for the downstream VLA module.
+        </p>
+      </div>
+      <div class="content has-text-centered">
+        <figure class="image">
+          <img src="./static/images/VLM_results.png" alt="VLM Instruction accuracy in benchmark tasks" style="width: 80%; display: block; margin: auto;">
+        </figure>
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{galaxea2025,
+    title={Galaxea G0: Open-World Dataset and Dual-System VLA Model},
+    author={Galaxea Team},
+    journal={arXiv preprint arXiv:XXXX.XXXXX},
+    year={2025}
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="./static/G0_paper.pdf">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/OpenGalaxea/G0" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website page is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            This website page template is borrowed from  <a
+              href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
