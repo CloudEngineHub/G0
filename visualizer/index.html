@@ -1,0 +1,1033 @@
+<!--
+  Author: Jimmy Wu (https://jimmyyhwu.github.io)
+  Date: February 2024
+
+  Note: Feel free to borrow the source code of this website, we just kindly ask that you link back to this page: https://droid-dataset.github.io/visualizer
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open Galaxea Dataset Visualizer</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <style>
+    #page-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+      z-index: 9999; /* Ensure it's on top */
+    }
+
+    .checkbox-container {
+      font-size: small;
+      margin-bottom: -0.75rem;
+    }
+
+    @media (min-width: 768px) {
+      #video-grid {
+        overflow-y: scroll; /* Always show the vertical scrollbar */
+        max-height: 90vh;
+      }
+    }
+
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.65);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      color: white; /* White text */
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      align-items: center;
+      font-size: 0.75rem;
+    }
+
+    .video-overlay:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="page-overlay"></div>
+
+  <div class="container mt-3">
+    <div class="row">
+      <h1 class="d-md-block d-none">Open Galaxea Dataset Visualizer(Still Updating)</h1>
+      <h3 class="d-block d-md-none">Open Galaxea Dataset Visualizer(Still Updating)</h3>
+
+      <p class="d-md-block d-none ml-3 mb-0 align-self-center">(Showing random subset of 1k trajectories from Open Galaxea Dataset)</p>
+      <p class="d-block d-md-none small">(Showing random subset of 1k trajectories from Open Galaxea Dataset)</p>
+
+    </div>
+
+    <div class="row">
+      <div class="col-md-2 px-1 col-12">
+        <div class="mb-2" id="scene-checkbox-group">
+          <h5 class="mb-1">Scene Types</h5>
+
+          <div class="checkbox-container">
+            <label for="scene-all-checkbox">
+              <input type="checkbox" id="scene-all-checkbox" checked>
+              All (<span id="scene-all-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="scene-1">
+              <input type="checkbox" class="scene-checkbox" id="scene-1">
+              Kitchen (<span id="scene-1-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="scene-2">
+              <input type="checkbox" class="scene-checkbox" id="scene-2">
+              Bedroom (<span id="scene-2-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="scene-3">
+              <input type="checkbox" class="scene-checkbox" id="scene-3">
+              Living Room (<span id="scene-3-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="scene-4">
+              <input type="checkbox" class="scene-checkbox" id="scene-4">
+              Dining Room (<span id="scene-4-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="scene-5">
+              <input type="checkbox" class="scene-checkbox" id="scene-5">
+              Bathroom (<span id="scene-5-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="scene-6">
+              <input type="checkbox" class="scene-checkbox" id="scene-6">
+              Laundry Room (<span id="scene-6-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="scene-7">
+              <input type="checkbox" class="scene-checkbox" id="scene-7">
+              Supermarket (<span id="scene-7-count">0</span>)
+            </label>
+          </div>
+
+<!--          <div class="checkbox-container">-->
+<!--            <label for="scene-8">-->
+<!--              <input type="checkbox" class="scene-checkbox" id="scene-8">-->
+<!--              Other (<span id="scene-8-count">0</span>)-->
+<!--            </label>-->
+<!--          </div>-->
+<!--        </div>-->
+
+        <div class="mb-2" id="object-checkbox-group">
+          <h5 class="mb-1">Object Types</h5>
+
+          <div class="checkbox-container">
+            <label for="object-all-checkbox">
+              <input type="checkbox" id="object-all-checkbox" checked>
+              All (<span id="object-all-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="object-1">
+              <input type="checkbox" class="object-checkbox" id="object-1">
+              Toy (<span id="object-1-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="object-2">
+              <input type="checkbox" class="object-checkbox" id="object-2">
+              Cloth (<span id="object-2-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="object-3">
+              <input type="checkbox" class="object-checkbox" id="object-3">
+              Kitchenware (<span id="object-3-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="object-4">
+              <input type="checkbox" class="object-checkbox" id="object-4">
+              Door (<span id="object-4-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="object-5">
+              <input type="checkbox" class="object-checkbox" id="object-5">
+              Trash (<span id="object-5-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="object-6">
+              <input type="checkbox" class="object-checkbox" id="object-6">
+              Food (<span id="object-6-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="object-7">
+              <input type="checkbox" class="object-checkbox" id="object-7">
+              Shoes (<span id="object-7-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="object-8">
+              <input type="checkbox" class="object-checkbox" id="object-8">
+              Bedding (<span id="object-8-count">0</span>)
+            </label>
+          </div>
+        </div>
+
+          <div class="checkbox-container">
+            <label for="object-9">
+              <input type="checkbox" class="object-checkbox" id="object-9">
+              Other (<span id="object-9-count">0</span>)
+            </label>
+          </div>
+        </div>
+
+<!--        <div class="checkbox-container">-->
+<!--            <label for="object-10">-->
+<!--              <input type="checkbox" class="object-checkbox" id="object-10">-->
+<!--              Bedding (<span id="object-10-count">0</span>)-->
+<!--            </label>-->
+<!--          </div>-->
+<!--        </div>-->
+
+<!--      <div class="checkbox-container">-->
+<!--            <label for="object-11">-->
+<!--              <input type="checkbox" class="object-checkbox" id="object-11">-->
+<!--              Other (<span id="object-11-count">0</span>)-->
+<!--            </label>-->
+<!--          </div>-->
+<!--        </div>-->
+
+        <div class="mb-2" id="task-checkbox-group">
+          <h5 class="mb-1">Task Types</h5>
+
+          <div class="checkbox-container">
+            <label for="task-all-checkbox">
+              <input type="checkbox" id="task-all-checkbox" checked>
+              All (<span id="task-all-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="task-1">
+              <input type="checkbox" class="task-checkbox" id="task-1">
+              Pick (<span id="task-1-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="task-2">
+              <input type="checkbox" class="task-checkbox" id="task-2">
+              Place (<span id="task-2-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="task-3">
+              <input type="checkbox" class="task-checkbox" id="task-3">
+              Move Torso (<span id="task-3-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="task-4">
+              <input type="checkbox" class="task-checkbox" id="task-4">
+              Move Base (<span id="task-4-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="task-5">
+              <input type="checkbox" class="task-checkbox" id="task-5">
+              Open (<span id="task-5-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="task-6">
+              <input type="checkbox" class="task-checkbox" id="task-6">
+              Close (<span id="task-6-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="task-7">
+              <input type="checkbox" class="task-checkbox" id="task-7">
+              Wipe (<span id="task-7-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="task-8">
+              <input type="checkbox" class="task-checkbox" id="task-8">
+              Throw (<span id="task-8-count">0</span>)
+            </label>
+          </div>
+
+          <div class="checkbox-container">
+            <label for="task-9">
+              <input type="checkbox" class="task-checkbox" id="task-9">
+              Other (<span id="task-9-count">0</span>)
+            </label>
+          </div>
+        </div>
+
+
+<!--          <div class="checkbox-container">-->
+<!--            <label for="task-10">-->
+<!--              <input type="checkbox" class="task-checkbox" id="task-10">-->
+<!--              Other (<span id="task-10-count">0</span>)-->
+<!--            </label>-->
+<!--          </div>-->
+<!--        </div>-->
+
+        <div class="mb-2 pr-5">
+          <p class="small mb-2" id="info-text"></p>
+          <button class="btn btn-outline-dark btn-sm" id="resample-button" style="display: none;">Resample</button>
+        </div>
+      </div>
+
+      <div class="col" id="video-grid">
+        <div class="row">
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+
+          <div class="col-md-3 p-1 d-flex">
+            <video class="border" autoplay loop muted playsinline width="100%" type="video/mp4"></video>
+            <div class="video-overlay p-3"><span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="container mt-3 text-center small">
+    <p>Thanks for the template open-sourced by <a href="https://jimmyyhwu.github.io">Jimmy Wu</a> for <a href="https://droid-dataset.github.io/visualizer">DROID Dataset</a>.</p>
+  </footer>
+
+  <script>
+    // Video metadata
+    const videos = [
+        JSON.parse('{"info": "Fully open the wardrobe door with the right hand.<br><br>Bedroom / Door / Open", "src": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_1_resized.jpg", "scene_id": "scene-2", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Move backward Lower torso<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_2_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the blue doll in the basket with your right hand.<br><br>Bedroom / Toy / Pick", "src": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_3_resized.jpg", "scene_id": "scene-2", "task_id": "task-1", "object_id": "object-1"}'),
+JSON.parse('{"info": "Tilt the torso backward until standing straight, then raise the torso.<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_4_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the blue doll into the wardrobe with your right hand.<br><br>Bedroom / Toy / Place", "src": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_5_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-1"}'),
+JSON.parse('{"info": "Fully close the wardrobe door with the left hand.<br><br>Bedroom / Door / Close", "src": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250718122536251_RAW/segment_6_resized.jpg", "scene_id": "scene-2", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Rotate right to the basket.<br><br>Bedroom / Other / Move Base", "src": "processed/extracted_videos_500/RB250319001_20250719175204178_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250719175204178_RAW/segment_2_resized.jpg", "scene_id": "scene-2", "task_id": "task-4", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the blue and pink doll in the basket with the right hand.<br><br>Bedroom / Toy / Pick", "src": "processed/extracted_videos_500/RB250319001_20250719175204178_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250719175204178_RAW/segment_3_resized.jpg", "scene_id": "scene-2", "task_id": "task-1", "object_id": "object-1"}'),
+JSON.parse('{"info": "Tilt torso backward until standing straight, then rotate left to the wardrobe door.<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319001_20250719175204178_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250719175204178_RAW/segment_4_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the blue-pink doll into the wardrobe with the right hand.<br><br>Bedroom / Toy / Place", "src": "processed/extracted_videos_500/RB250319001_20250719175204178_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250719175204178_RAW/segment_5_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-1"}'),
+JSON.parse('{"info": "Fully close the wardrobe door with the right hand.<br><br>Bedroom / Door / Close", "src": "processed/extracted_videos_500/RB250319001_20250719175204178_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250719175204178_RAW/segment_6_resized.jpg", "scene_id": "scene-2", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Move body to bedside. Bend torso forward to look over the bed. Pick up the blue doll on the right side of the bed with right hand.<br><br>Bedroom / Toy / Pick", "src": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_1_resized.jpg", "scene_id": "scene-2", "task_id": "task-1", "object_id": "object-1"}'),
+JSON.parse('{"info": "Tilt torso backward until standing upright, move backward then rotate right to face the basket.<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_2_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Tilt torso forward to look above the basket. Place the blue doll into the basket with right hand.<br><br>Bedroom / Toy / Place", "src": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_3_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-1"}'),
+JSON.parse('{"info": "Tilt torso backward until standing upright, then rotate left and move to the bedside.<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_4_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Tilt torso forward to look above the bed. Pick up the red doll on the left side of the bed with left hand.<br><br>Bedroom / Toy / Pick", "src": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_5_resized.jpg", "scene_id": "scene-2", "task_id": "task-1", "object_id": "object-1"}'),
+JSON.parse('{"info": "Tilt torso backward until standing upright, move backward then rotate right to face the basket<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_6_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Tilt torso forward to look above the basket. Place the red doll into the basket with left hand.<br><br>Bedroom / Toy / Place", "src": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_7_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-1"}'),
+JSON.parse('{"info": "Tilt torso backward until body stands upright<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250721110746081_RAW/segment_8_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the third bottle of mineral water from the left with your right hand. Place the mineral water to the left side of the sink with your right hand.<br><br>Kitchen / Other / Place", "src": "processed/extracted_videos_500/RB250319001_20250721195539966_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250721195539966_RAW/segment_1_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the second bottle of mineral water from the left with your right hand. Place the bottle to the left of the third bottle of mineral water with your right hand.<br><br>Kitchen / Other / Place", "src": "processed/extracted_videos_500/RB250319001_20250721195539966_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250721195539966_RAW/segment_3_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the first bottle of mineral water from the left with the right hand. Place the mineral water to the right of the third bottle with the right hand.<br><br>Kitchen / Other / Place", "src": "processed/extracted_videos_500/RB250319001_20250721195539966_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250721195539966_RAW/segment_5_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the persimmon with the right hand and place it in the bottom drawer.<br><br>Kitchen / Food / Place", "src": "processed/extracted_videos_500/RB250319001_20250723202842529_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250723202842529_RAW/segment_2_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Pick up the onion with the right hand and place it in the bottom drawer.<br><br>Kitchen / Food / Place", "src": "processed/extracted_videos_500/RB250319001_20250723202842529_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250723202842529_RAW/segment_3_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Pick up the small pumpkin with the right hand and place it in the bottom drawer.<br><br>Kitchen / Food / Place", "src": "processed/extracted_videos_500/RB250319001_20250723202842529_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250723202842529_RAW/segment_4_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Fully push the bottom drawer into the refrigerator with the right hand.<br><br>Kitchen / Food / Place", "src": "processed/extracted_videos_500/RB250319001_20250723202842529_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250723202842529_RAW/segment_5_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Move body closer to the bed<br><br>Bedroom / Other / Move Base", "src": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_1_resized.jpg", "scene_id": "scene-2", "task_id": "task-4", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the green doll with the right hand.<br><br>Bedroom / Toy / Pick", "src": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_2_resized.jpg", "scene_id": "scene-2", "task_id": "task-1", "object_id": "object-1"}'),
+JSON.parse('{"info": "Tilt torso backward Move backward Rotate right<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_3_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the green doll into the basket with the right hand.<br><br>Bedroom / Toy / Place", "src": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_4_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-1"}'),
+JSON.parse('{"info": "Tilt torso backward, rotate left<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_5_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the blue doll with the left hand.<br><br>Bedroom / Toy / Pick", "src": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_6_resized.jpg", "scene_id": "scene-2", "task_id": "task-1", "object_id": "object-1"}'),
+JSON.parse('{"info": "Torso lean backward Move backward Rotate right<br><br>Bedroom / Other / Move Base", "src": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_7_resized.jpg", "scene_id": "scene-2", "task_id": "task-4", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the blue doll into the basket with the left hand.<br><br>Bedroom / Toy / Place", "src": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_8_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-1"}'),
+JSON.parse('{"info": "Return to the initial position.<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_9_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250724195418209_RAW/segment_9_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the phone with the right hand and place it back on the base.<br><br>Bedroom / Other / Other", "src": "processed/extracted_videos_500/RB250319001_20250725114123502_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250725114123502_RAW/segment_1_resized.jpg", "scene_id": "scene-2", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the plate with the right hand. Place the plate on the tray with the right hand.<br><br>Kitchen / Kitchenware / Place", "src": "processed/extracted_videos_500/RB250319001_20250725143655002_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250725143655002_RAW/segment_1_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-3"}'),
+JSON.parse('{"info": "Pick up the bowl with the left hand. Place the bowl on the plate with the left hand.<br><br>Kitchen / Kitchenware / Place", "src": "processed/extracted_videos_500/RB250319001_20250725143655002_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250725143655002_RAW/segment_2_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-3"}'),
+JSON.parse('{"info": "Pick up the spoon with the left hand. Place the spoon on the tray with the left hand.<br><br>Kitchen / Kitchenware / Place", "src": "processed/extracted_videos_500/RB250319001_20250725143655002_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250725143655002_RAW/segment_3_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-3"}'),
+JSON.parse('{"info": "Fully open the washing machine door with the left hand.<br><br>Laundry Room / Door / Open", "src": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_2_resized.jpg", "scene_id": "scene-6", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Approach the laundry basket.<br><br>Laundry Room / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_3_resized.jpg", "scene_id": "scene-6", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the red clothing with the right hand.<br><br>Laundry Room / Cloth / Pick", "src": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_4_resized.jpg", "scene_id": "scene-6", "task_id": "task-1", "object_id": "object-2"}'),
+JSON.parse('{"info": "Move body closer to the washing machine.<br><br>Laundry Room / Other / Move Base", "src": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_5_resized.jpg", "scene_id": "scene-6", "task_id": "task-4", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the red clothes into the washing machine with the right hand.<br><br>Laundry Room / Cloth / Place", "src": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_6_resized.jpg", "scene_id": "scene-6", "task_id": "task-2", "object_id": "object-2"}'),
+JSON.parse('{"info": "Close the left washing machine door halfway.<br><br>Laundry Room / Door / Close", "src": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_7_resized.jpg", "scene_id": "scene-6", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Fully close the washing machine door with the right hand.<br><br>Laundry Room / Door / Close", "src": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250722140551681_RAW/segment_8_resized.jpg", "scene_id": "scene-6", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Pick up the hat on the cabinet with right hand. Hang the hat on the right side of the wall-mounted coat rack.<br><br>Living Room / Cloth / Other", "src": "processed/extracted_videos_500/RB250319017_20250723192329599_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250723192329599_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-2"}'),
+JSON.parse('{"info": "Hang the pants on the left side of the wall-mounted coat rack with the left hand.<br><br>Living Room / Cloth / Other", "src": "processed/extracted_videos_500/RB250319017_20250723194147852_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250723194147852_RAW/segment_5_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-2"}'),
+JSON.parse('{"info": "Open the microwave door with the right hand.<br><br>Kitchen / Door / Open", "src": "processed/extracted_videos_500/RB250319017_20250726105943491_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250726105943491_RAW/segment_1_resized.jpg", "scene_id": "scene-1", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Pick up the food on the plate with your right hand and place it in the microwave.<br><br>Dining Room / Food / Place", "src": "processed/extracted_videos_500/RB250319017_20250726145606781_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250726145606781_RAW/segment_3_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Pick up the food inside the microwave with the right hand and place it on the tray.<br><br>Dining Room / Food / Place", "src": "processed/extracted_videos_500/RB250319017_20250726145606781_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250726145606781_RAW/segment_8_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Pick up the tomato sauce bottle with the right hand and place it on the second-tier spice rack.<br><br>Kitchen / Other / Place", "src": "processed/extracted_videos_500/RB250319017_20250726162810501_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250726162810501_RAW/segment_1_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the oyster sauce bottle with the right hand and place it on the first-level seasoning rack.<br><br>Kitchen / Other / Place", "src": "processed/extracted_videos_500/RB250319017_20250726162810501_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250726162810501_RAW/segment_2_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the light soy sauce bottle with the left hand and place it on the third-tier spice rack.<br><br>Kitchen / Other / Place", "src": "processed/extracted_videos_500/RB250319017_20250726162810501_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250726162810501_RAW/segment_3_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the vinegar bottle with the left hand and place it on the second-level seasoning rack.<br><br>Kitchen / Other / Place", "src": "processed/extracted_videos_500/RB250319017_20250726162810501_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250726162810501_RAW/segment_4_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Open the top cabinet door with the right hand.<br><br>Living Room / Door / Open", "src": "processed/extracted_videos_500/RB250319017_20250728154235183_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250728154235183_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Pick up the slippers above the shoe cabinet with the right hand and place them inside the shoe cabinet.<br><br>Living Room / Shoes / Place", "src": "processed/extracted_videos_500/RB250319017_20250728154235183_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250728154235183_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-7"}'),
+JSON.parse('{"info": "Close the shoe cabinet with the right hand.<br><br>Living Room / Other / Close", "src": "processed/extracted_videos_500/RB250319017_20250728154235183_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250728154235183_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Fully open the washing machine door with both hands.<br><br>Laundry Room / Door / Open", "src": "processed/extracted_videos_500/RB250319017_20250729115531540_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250729115531540_RAW/segment_1_resized.jpg", "scene_id": "scene-6", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Pick up the middle piece of clothing in the laundry basket with the right hand.<br><br>Laundry Room / Cloth / Pick", "src": "processed/extracted_videos_500/RB250319017_20250729115531540_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250729115531540_RAW/segment_2_resized.jpg", "scene_id": "scene-6", "task_id": "task-1", "object_id": "object-2"}'),
+JSON.parse('{"info": "Place the clothes into the washing machine with the right hand.<br><br>Laundry Room / Cloth / Place", "src": "processed/extracted_videos_500/RB250319017_20250729115531540_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250729115531540_RAW/segment_3_resized.jpg", "scene_id": "scene-6", "task_id": "task-2", "object_id": "object-2"}'),
+JSON.parse('{"info": "Fully close the washing machine door with both hands.<br><br>Laundry Room / Door / Close", "src": "processed/extracted_videos_500/RB250319017_20250729115531540_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250729115531540_RAW/segment_4_resized.jpg", "scene_id": "scene-6", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Pick up the cola with the right hand and place it on top of the refrigerator.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319017_20250801174154746_RAW/segment_10_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250801174154746_RAW/segment_10_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Close the refrigerator door with the right hand.<br><br>Living Room / Door / Close", "src": "processed/extracted_videos_500/RB250319017_20250801174154746_RAW/segment_11_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250801174154746_RAW/segment_11_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Open the upper drawer of the refrigerator with the right hand.<br><br>Living Room / Other / Open", "src": "processed/extracted_videos_500/RB250319017_20250802140816377_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250802140816377_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the sweet potato with the right hand and place it in the drawer.<br><br>Living Room / Food / Place", "src": "processed/extracted_videos_500/RB250319017_20250802140816377_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250802140816377_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Fully close the upper drawer of the refrigerator with the right hand.<br><br>Living Room / Other / Close", "src": "processed/extracted_videos_500/RB250319017_20250802140816377_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250802140816377_RAW/segment_6_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the bowl with the right hand. Pour the ingredients into the frying pan. Return the bowl to the initial position.<br><br>Kitchen / Food / Other", "src": "processed/extracted_videos_500/RB250319017_20250802171807057_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250802171807057_RAW/segment_2_resized.jpg", "scene_id": "scene-1", "task_id": "task-9", "object_id": "object-6"}'),
+JSON.parse('{"info": "Pick up the bowl with the right hand, pour the ingredients into the frying pan, then return to the initial position.<br><br>Kitchen / Food / Other", "src": "processed/extracted_videos_500/RB250319017_20250802171807057_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250802171807057_RAW/segment_6_resized.jpg", "scene_id": "scene-1", "task_id": "task-9", "object_id": "object-6"}'),
+JSON.parse('{"info": "Pick up the spatula with the right hand, stir in the pot, then return to the initial position.<br><br>Kitchen / Food / Other", "src": "processed/extracted_videos_500/RB250319017_20250802171807057_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250802171807057_RAW/segment_8_resized.jpg", "scene_id": "scene-1", "task_id": "task-9", "object_id": "object-6"}'),
+JSON.parse('{"info": "Pick up the plate with left hand. Place the plate into the tray with left hand.<br><br>Kitchen / Kitchenware / Place", "src": "processed/extracted_videos_500/RB250319017_20250804165625854_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250804165625854_RAW/segment_1_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-3"}'),
+JSON.parse('{"info": "Pick up the bowl with the right hand. Place the bowl on the plate with the right hand.<br><br>Kitchen / Kitchenware / Place", "src": "processed/extracted_videos_500/RB250319017_20250804165625854_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250804165625854_RAW/segment_2_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-3"}'),
+JSON.parse('{"info": "Pick up the spoon with the right hand. Place the spoon on the bowl with the right hand.<br><br>Kitchen / Kitchenware / Place", "src": "processed/extracted_videos_500/RB250319017_20250804165625854_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250804165625854_RAW/segment_3_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-3"}'),
+JSON.parse('{"info": "Fully open the cabinet door with the left hand.<br><br>Living Room / Door / Open", "src": "processed/extracted_videos_500/RB250319017_20250805144346478_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250805144346478_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Pick up the slippers on the shoe cabinet with your right hand and place them on the first shelf of the shoe cabinet.<br><br>Living Room / Shoes / Place", "src": "processed/extracted_videos_500/RB250319017_20250805144346478_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250805144346478_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-7"}'),
+JSON.parse('{"info": "Close the cabinet door with the right hand.<br><br>Living Room / Door / Close", "src": "processed/extracted_videos_500/RB250319017_20250805144346478_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319017_20250805144346478_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Open the rice cooker lid with the right hand.<br><br>Kitchen / Other / Open", "src": "processed/extracted_videos_500/RB250319020_20250717171452191_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319020_20250717171452191_RAW/segment_1_resized.jpg", "scene_id": "scene-1", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Use the right hand to scoop half a bowl of soup from the pot with a spoon and pour it into the white bowl on the left side of the table.<br><br>Kitchen / Other / Other", "src": "processed/extracted_videos_500/RB250319020_20250717171452191_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319020_20250717171452191_RAW/segment_3_resized.jpg", "scene_id": "scene-1", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Fully close the rice cooker lid with the left hand.<br><br>Kitchen / Other / Close", "src": "processed/extracted_videos_500/RB250319020_20250717171452191_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319020_20250717171452191_RAW/segment_5_resized.jpg", "scene_id": "scene-1", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the book on the shelf with left hand.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319020_20250719152650406_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319020_20250719152650406_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Open the faucet with left hand<br><br>Bathroom / Other / Open", "src": "processed/extracted_videos_500/S2RL1009P25149_20250728122346430_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250728122346430_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Close the faucet with the left hand.<br><br>Bathroom / Other / Close", "src": "processed/extracted_videos_500/S2RL1009P25149_20250728122346430_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250728122346430_RAW/segment_2_resized.jpg", "scene_id": "scene-5", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the towel on the table with your right hand.<br><br>Bathroom / Other / Pick", "src": "processed/extracted_videos_500/S2RL1009P25149_20250728122346430_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250728122346430_RAW/segment_3_resized.jpg", "scene_id": "scene-5", "task_id": "task-1", "object_id": "object-9"}'),
+JSON.parse('{"info": "Use the towel with the right hand to wipe the sink.<br><br>Bathroom / Other / Wipe", "src": "processed/extracted_videos_500/S2RL1009P25149_20250728122346430_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250728122346430_RAW/segment_4_resized.jpg", "scene_id": "scene-5", "task_id": "task-7", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the towel on the table with the right hand.<br><br>Bathroom / Other / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250728122346430_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250728122346430_RAW/segment_5_resized.jpg", "scene_id": "scene-5", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the slipper on the floor with the right hand.<br><br>Bedroom / Shoes / Pick", "src": "processed/extracted_videos_500/S2RL1009P25149_20250728175116814_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250728175116814_RAW/segment_1_resized.jpg", "scene_id": "scene-2", "task_id": "task-1", "object_id": "object-7"}'),
+JSON.parse('{"info": "Place the slippers on the floor shoe cabinet with the right hand.<br><br>Bedroom / Shoes / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250728175116814_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250728175116814_RAW/segment_2_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-7"}'),
+JSON.parse('{"info": "Open the faucet with left hand.<br><br>Bathroom / Other / Open", "src": "processed/extracted_videos_500/S2RL1009P25149_20250730210012465_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250730210012465_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Close the faucet with the left hand, then pick up the towel on the table.<br><br>Bathroom / Other / Close", "src": "processed/extracted_videos_500/S2RL1009P25149_20250730210012465_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250730210012465_RAW/segment_2_resized.jpg", "scene_id": "scene-5", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Use the towel with the left hand to wipe the sink.<br><br>Bathroom / Other / Pick", "src": "processed/extracted_videos_500/S2RL1009P25149_20250730210012465_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250730210012465_RAW/segment_3_resized.jpg", "scene_id": "scene-5", "task_id": "task-1", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the towel back on the table with the left hand.<br><br>Bathroom / Other / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250730210012465_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250730210012465_RAW/segment_4_resized.jpg", "scene_id": "scene-5", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the towel with the right hand.<br><br>Bathroom / Other / Pick", "src": "processed/extracted_videos_500/S2RL1009P25149_20250731120438369_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250731120438369_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-1", "object_id": "object-9"}'),
+JSON.parse('{"info": "Wipe the mirror with the towel using the right hand.<br><br>Bathroom / Other / Wipe", "src": "processed/extracted_videos_500/S2RL1009P25149_20250731120438369_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250731120438369_RAW/segment_2_resized.jpg", "scene_id": "scene-5", "task_id": "task-7", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the towel back on the washstand with the right hand.<br><br>Bathroom / Other / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250731120438369_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250731120438369_RAW/segment_3_resized.jpg", "scene_id": "scene-5", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the rag on the water tank with the right hand.<br><br>Bathroom / Other / Pick", "src": "processed/extracted_videos_500/S2RL1009P25149_20250731161823028_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250731161823028_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-1", "object_id": "object-9"}'),
+JSON.parse('{"info": "Wipe the toilet seat clean with a cloth using the right hand.<br><br>Bathroom / Other / Wipe", "src": "processed/extracted_videos_500/S2RL1009P25149_20250731161823028_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250731161823028_RAW/segment_2_resized.jpg", "scene_id": "scene-5", "task_id": "task-7", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the cloth back on the water tank with the right hand.<br><br>Bathroom / Other / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250731161823028_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250731161823028_RAW/segment_3_resized.jpg", "scene_id": "scene-5", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Lift the trash on the left side of the bin with left hand and throw it into the bin.<br><br>Living Room / Trash / Throw", "src": "processed/extracted_videos_500/S2RL1009P25149_20250801113835726_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250801113835726_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-8", "object_id": "object-5"}'),
+JSON.parse('{"info": "Throw the plastic bottle into the trash bin with the left hand.<br><br>Living Room / Trash / Throw", "src": "processed/extracted_videos_500/S2RL1009P25149_20250801113835726_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250801113835726_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-8", "object_id": "object-5"}'),
+JSON.parse('{"info": "Grasp the trash on the right side of the trash bin with the right hand and throw it into the bin.<br><br>Living Room / Trash / Throw", "src": "processed/extracted_videos_500/S2RL1009P25149_20250801113835726_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250801113835726_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-8", "object_id": "object-5"}'),
+JSON.parse('{"info": "Return to the initial position<br><br>Living Room / Other / Move Torso", "src": "processed/extracted_videos_500/S2RL1009P25149_20250801113835726_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250801113835726_RAW/segment_5_resized.jpg", "scene_id": "scene-3", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Tilt torso forward to look down<br><br>Living Room / Other / Move Torso", "src": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the shoe neatly with the right hand.<br><br>Living Room / Shoes / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-7"}'),
+JSON.parse('{"info": "Place the shoe into the shoebox with the right hand.<br><br>Living Room / Shoes / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-7"}'),
+JSON.parse('{"info": "Adjust the shoebox position with the right hand.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_5_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Close the shoebox lid with both hands.<br><br>Living Room / Other / Close", "src": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_6_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Return to initial position<br><br>Living Room / Other / Move Torso", "src": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250801163254913_RAW/segment_7_resized.jpg", "scene_id": "scene-3", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Fully pull open the bedside table drawer with the right hand.<br><br>Bedroom / Other / Open", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_1_resized.jpg", "scene_id": "scene-2", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the air conditioner remote with the right hand and place it in the drawer.<br><br>Bedroom / Other / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_2_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Fully close the bedside table drawer with the right hand.<br><br>Bedroom / Other / Close", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_3_resized.jpg", "scene_id": "scene-2", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Return to the initial position<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_4_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Fully pull open the bedside drawer with the right hand.<br><br>Bedroom / Other / Open", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_6_resized.jpg", "scene_id": "scene-2", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the air conditioner remote with the right hand and place it on the table.<br><br>Bedroom / Other / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_7_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Fully close the bedside table drawer with the right hand.<br><br>Bedroom / Other / Close", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_8_resized.jpg", "scene_id": "scene-2", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Return to the initial position<br><br>Bedroom / Other / Move Torso", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_9_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802121006323_RAW/segment_9_resized.jpg", "scene_id": "scene-2", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Turn on the air conditioner with the right hand.<br><br>Bedroom / Other / Other", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802154125800_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802154125800_RAW/segment_1_resized.jpg", "scene_id": "scene-2", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Adjust the air conditioner temperature with the right hand.<br><br>Bedroom / Other / Other", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802154125800_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802154125800_RAW/segment_2_resized.jpg", "scene_id": "scene-2", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Close the air conditioner switch with the right hand.<br><br>Bedroom / Other / Other", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802154125800_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802154125800_RAW/segment_4_resized.jpg", "scene_id": "scene-2", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Open the bedroom door with the left hand.<br><br>Living Room / Door / Open", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802180635364_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802180635364_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Fully open the bedroom door with the right hand.<br><br>Living Room / Door / Open", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802180635364_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802180635364_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Fully close the bedroom door with the left hand.<br><br>Living Room / Door / Close", "src": "processed/extracted_videos_500/S2RL1009P25149_20250802180635364_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250802180635364_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Move body closer to the left sofa.<br><br>Living Room / Other / Move Torso", "src": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the white cushion diagonally against the back of the sofa using both hands.<br><br>Living Room / Bedding / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-8"}'),
+JSON.parse('{"info": "Move body to the right. Tilt the blue cushion against the sofa back with both hands.<br><br>Living Room / Bedding / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-8"}'),
+JSON.parse('{"info": "Move body closer to the right sofa.<br><br>Living Room / Other / Move Base", "src": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-4", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the orange cushion diagonally against the back of the sofa with both hands.<br><br>Living Room / Bedding / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_5_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-8"}'),
+JSON.parse('{"info": "Return to the initial position.<br><br>Living Room / Other / Move Torso", "src": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250804163827497_RAW/segment_6_resized.jpg", "scene_id": "scene-3", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the pot lid with left hand and place it on the stove.<br><br>Kitchen / Kitchenware / Place", "src": "processed/extracted_videos_500/RB250319001_20250726175059761_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250726175059761_RAW/segment_2_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-3"}'),
+JSON.parse('{"info": "Move to the front of the refrigerator.<br><br>Dining Room / Other / Move Base", "src": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_1_resized.jpg", "scene_id": "scene-4", "task_id": "task-4", "object_id": "object-9"}'),
+JSON.parse('{"info": "Open the refrigerator drawer with the right hand.<br><br>Dining Room / Other / Open", "src": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_2_resized.jpg", "scene_id": "scene-4", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the pumpkin into the refrigerator drawer with the right hand.<br><br>Dining Room / Food / Place", "src": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_3_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Place the apple into the refrigerator drawer with the right hand.<br><br>Dining Room / Food / Place", "src": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_4_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Place the bell pepper into the refrigerator drawer with the right hand.<br><br>Dining Room / Food / Place", "src": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_5_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Close the refrigerator drawer completely with the right hand.<br><br>Dining Room / Other / Place", "src": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250728135029259_RAW/segment_6_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Open the upper drawer with the right hand.<br><br>Living Room / Other / Open", "src": "processed/extracted_videos_500/RB250319001_20250729144524115_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250729144524115_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the white doll with the right hand and place it in the drawer.<br><br>Living Room / Toy / Place", "src": "processed/extracted_videos_500/RB250319001_20250729144524115_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250729144524115_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-1"}'),
+JSON.parse('{"info": "Close the upper drawer with the right hand.<br><br>Living Room / Other / Close", "src": "processed/extracted_videos_500/RB250319001_20250729144524115_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250729144524115_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Return to the home position<br><br>Living Room / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319001_20250729144524115_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250729144524115_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the black garment in front with the right hand.<br><br>Bedroom / Cloth / Pick", "src": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_1_resized.jpg", "scene_id": "scene-2", "task_id": "task-1", "object_id": "object-2"}'),
+JSON.parse('{"info": "Tilt body backward Move backward Rotate right to face the laundry basket<br><br>Bedroom / Other / Move Base", "src": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_2_resized.jpg", "scene_id": "scene-2", "task_id": "task-4", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the black clothing in the left hand into the laundry basket.<br><br>Bedroom / Cloth / Place", "src": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_3_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-2"}'),
+JSON.parse('{"info": "Tilt body backward, rotate left to the center of the bed<br><br>Bedroom / Other / Move Base", "src": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_4_resized.jpg", "scene_id": "scene-2", "task_id": "task-4", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the green clothing with the right hand.<br><br>Bedroom / Cloth / Pick", "src": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_5_resized.jpg", "scene_id": "scene-2", "task_id": "task-1", "object_id": "object-2"}'),
+JSON.parse('{"info": "Tilt body backward, rotate right to face the laundry basket<br><br>Bedroom / Other / Move Base", "src": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_6_resized.jpg", "scene_id": "scene-2", "task_id": "task-4", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the green clothes into the laundry basket with the right hand.<br><br>Bedroom / Cloth / Place", "src": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_7_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-2"}'),
+JSON.parse('{"info": "Tilt body backward, rotate left to the center of the bed<br><br>Bedroom / Other / Move Base", "src": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_8_resized.jpg", "scene_id": "scene-2", "task_id": "task-4", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the gray clothes with the left hand.<br><br>Bedroom / Cloth / Pick", "src": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_9_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_9_resized.jpg", "scene_id": "scene-2", "task_id": "task-1", "object_id": "object-2"}'),
+JSON.parse('{"info": "Tilt body backward, move backward, rotate right to face the laundry basket<br><br>Bedroom / Other / Move Base", "src": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_10_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_10_resized.jpg", "scene_id": "scene-2", "task_id": "task-4", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the gray clothes into the laundry basket with the left hand.<br><br>Bedroom / Cloth / Place", "src": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_11_resized.mp4", "poster": "processed/extracted_videos_500/RB250319001_20250731162748062_RAW/segment_11_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-2"}'),
+JSON.parse('{"info": "Raise the torso and look down at the clothing. Pick up the iron with the right hand.<br><br>Laundry Room / Other / Pick", "src": "processed/extracted_videos_500/RB250319004_20250718143548510_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250718143548510_RAW/segment_1_resized.jpg", "scene_id": "scene-6", "task_id": "task-1", "object_id": "object-9"}'),
+JSON.parse('{"info": "Iron the clothes with the iron in your right hand.<br><br>Laundry Room / Other / Other", "src": "processed/extracted_videos_500/RB250319004_20250718143548510_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250718143548510_RAW/segment_2_resized.jpg", "scene_id": "scene-6", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the iron back to its original position with the right hand.<br><br>Laundry Room / Other / Place", "src": "processed/extracted_videos_500/RB250319004_20250718143548510_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250718143548510_RAW/segment_3_resized.jpg", "scene_id": "scene-6", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Tilt torso backward until body stands upright<br><br>Laundry Room / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319004_20250718143548510_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250718143548510_RAW/segment_4_resized.jpg", "scene_id": "scene-6", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the cloth with the right hand. Wipe the stove. Place the cloth on the stove.<br><br>Kitchen / Other / Wipe", "src": "processed/extracted_videos_500/RB250319004_20250719152207000_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250719152207000_RAW/segment_1_resized.jpg", "scene_id": "scene-1", "task_id": "task-7", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the lamp\'s power cord with the right hand.<br><br>Living Room / Other / Pick", "src": "processed/extracted_videos_500/RB250319004_20250721154602423_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250721154602423_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-1", "object_id": "object-9"}'),
+JSON.parse('{"info": "Plug the desk lamp\'s power cord into the power outlet with the right hand.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319004_20250721154602423_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250721154602423_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Disconnect the power cable from the port with right hand.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319004_20250721154602423_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250721154602423_RAW/segment_7_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Disconnect the power cable from the port with the right hand.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319004_20250721154602423_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250721154602423_RAW/segment_8_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the egg from the plate with your right hand and place it into the egg box.<br><br>Dining Room / Food / Place", "src": "processed/extracted_videos_500/RB250319004_20250722110844268_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250722110844268_RAW/segment_1_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Pick up the egg from the plate with the right hand and place it into the egg box.<br><br>Dining Room / Food / Place", "src": "processed/extracted_videos_500/RB250319004_20250722110844268_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250722110844268_RAW/segment_2_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Pick up the egg from the plate with your right hand and place it into the egg box.<br><br>Dining Room / Food / Place", "src": "processed/extracted_videos_500/RB250319004_20250722110844268_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250722110844268_RAW/segment_3_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Pick up the egg from the plate with the right hand and place it into the egg carton.<br><br>Dining Room / Food / Place", "src": "processed/extracted_videos_500/RB250319004_20250722110844268_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250722110844268_RAW/segment_4_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Collaborate with both hands to fully close the egg carton.<br><br>Dining Room / Food / Place", "src": "processed/extracted_videos_500/RB250319004_20250722110844268_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250722110844268_RAW/segment_5_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Use both hands to pick up the pen on the desk. Place the pen into the pen holder with the right hand.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319004_20250722151343623_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250722151343623_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the pen at the lower right side of the book with the right hand. Place the pen into the pen holder with the right hand.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319004_20250722151343623_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250722151343623_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the pen on the upper right side of the book with the right hand. Place the pen into the pen holder with the right hand.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319004_20250722151343623_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250722151343623_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Close the book with both hands.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319004_20250722151343623_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250722151343623_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Open the glasses case with both hands.<br><br>Living Room / Other / Open", "src": "processed/extracted_videos_500/RB250319004_20250723104512473_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250723104512473_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the glasses into the case with the right hand, then close the case with both hands.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319004_20250723104512473_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250723104512473_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the glasses back on the table with the right hand. Close the glasses case with both hands. Place the glasses case back on the table with the left hand.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319004_20250723104512473_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250723104512473_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the spoon from the milk powder can with your right hand. Scoop one spoonful of milk powder from the can into the bowl. Return the spoon to the milk powder can.<br><br>Dining Room / Kitchenware / Other", "src": "processed/extracted_videos_500/RB250319004_20250723201040374_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250723201040374_RAW/segment_1_resized.jpg", "scene_id": "scene-4", "task_id": "task-9", "object_id": "object-3"}'),
+JSON.parse('{"info": "Pick up the kettle with left hand and pour water into the bowl, then place the kettle back with left hand.<br><br>Dining Room / Kitchenware / Other", "src": "processed/extracted_videos_500/RB250319004_20250723201040374_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250723201040374_RAW/segment_2_resized.jpg", "scene_id": "scene-4", "task_id": "task-9", "object_id": "object-3"}'),
+JSON.parse('{"info": "Pick up the spoon from the bowl with your right hand. Stir the milk powder with the spoon. Place the spoon back into the bowl.<br><br>Dining Room / Kitchenware / Other", "src": "processed/extracted_videos_500/RB250319004_20250723201040374_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250723201040374_RAW/segment_3_resized.jpg", "scene_id": "scene-4", "task_id": "task-9", "object_id": "object-3"}'),
+JSON.parse('{"info": "Pick up the water bottle with the left hand.<br><br>Dining Room / Other / Pick", "src": "processed/extracted_videos_500/RB250319004_20250726174951931_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250726174951931_RAW/segment_1_resized.jpg", "scene_id": "scene-4", "task_id": "task-1", "object_id": "object-9"}'),
+JSON.parse('{"info": "Twist open the cap of the water bottle in your left hand with your right hand.<br><br>Dining Room / Other / Other", "src": "processed/extracted_videos_500/RB250319004_20250726174951931_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250726174951931_RAW/segment_2_resized.jpg", "scene_id": "scene-4", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the water bottle back on the table with the left hand.<br><br>Dining Room / Other / Place", "src": "processed/extracted_videos_500/RB250319004_20250726174951931_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250726174951931_RAW/segment_3_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Grasp the chair with both hands and pull it outward to a one-person position.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319004_20250728151806279_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250728151806279_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Grasp the chair with both hands and push it completely under the table.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319004_20250728151806279_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250728151806279_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Fully open the right cabinet door with the right hand.<br><br>Bathroom / Door / Open", "src": "processed/extracted_videos_500/RB250319004_20250729211629329_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250729211629329_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Raise torso closer to the sink countertop<br><br>Bathroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319004_20250729211629329_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250729211629329_RAW/segment_2_resized.jpg", "scene_id": "scene-5", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the hair dryer with the right hand.<br><br>Bathroom / Other / Pick", "src": "processed/extracted_videos_500/RB250319004_20250729211629329_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250729211629329_RAW/segment_3_resized.jpg", "scene_id": "scene-5", "task_id": "task-1", "object_id": "object-9"}'),
+JSON.parse('{"info": "Lower the torso. Place the hairdryer into the cabinet with the right hand.<br><br>Bathroom / Other / Place", "src": "processed/extracted_videos_500/RB250319004_20250729211629329_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250729211629329_RAW/segment_4_resized.jpg", "scene_id": "scene-5", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the towel with left hand and wipe the stain. Place the towel on the table with left hand.<br><br>Living Room / Other / Wipe", "src": "processed/extracted_videos_500/RB250319004_20250801121411728_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250801121411728_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-7", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the power cord of the fan with your left hand and plug it into the far right socket of the power strip.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319004_20250804165129006_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250804165129006_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Hold the power strip with the right hand. Unplug the power cord with the left hand and place it on the table.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319004_20250804165129006_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/RB250319004_20250804165129006_RAW/segment_6_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the lid of the storage box with the left hand. Place the lid on the table with the left hand.<br><br>Living Room / Other / Open", "src": "processed/extracted_videos_500/RB250319008_20250716214702666_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250716214702666_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the toy car on the ground with your right hand and place it into the storage box.<br><br>Living Room / Toy / Place", "src": "processed/extracted_videos_500/RB250319008_20250716214702666_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250716214702666_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-1"}'),
+JSON.parse('{"info": "Pick up the toy car from the ground with your right hand and place it into the storage box.<br><br>Living Room / Toy / Place", "src": "processed/extracted_videos_500/RB250319008_20250716214702666_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250716214702666_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-1"}'),
+JSON.parse('{"info": "Pick up the toy car on the table with your right hand and place it into the storage box.<br><br>Living Room / Toy / Place", "src": "processed/extracted_videos_500/RB250319008_20250716214702666_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250716214702666_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-1"}'),
+JSON.parse('{"info": "Pick up the lid of the storage box with left hand. Place the lid on the storage box with left hand.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319008_20250716214702666_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250716214702666_RAW/segment_5_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Open the air fryer with left hand. Place the fryer on the table.<br><br>Dining Room / Kitchenware / Other", "src": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_1_resized.jpg", "scene_id": "scene-4", "task_id": "task-9", "object_id": "object-3"}'),
+JSON.parse('{"info": "Pick up the white plate on the right side of the table with your right hand and pour the food into the pot.<br><br>Dining Room / Food / Other", "src": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_2_resized.jpg", "scene_id": "scene-4", "task_id": "task-9", "object_id": "object-6"}'),
+JSON.parse('{"info": "Place the plate back on the table with the right hand.<br><br>Dining Room / Kitchenware / Place", "src": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_3_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-3"}'),
+JSON.parse('{"info": "Close the air fryer with the left hand.<br><br>Dining Room / Other / Other", "src": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_4_resized.jpg", "scene_id": "scene-4", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Open the air fryer with left hand and pour the food into the plate on the left side of the table.<br><br>Dining Room / Kitchenware / Other", "src": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_7_resized.jpg", "scene_id": "scene-4", "task_id": "task-9", "object_id": "object-3"}'),
+JSON.parse('{"info": "Close the air fryer with left hand.<br><br>Dining Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250719135526765_RAW/segment_8_resized.jpg", "scene_id": "scene-4", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Remove the pen cap with the right hand.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319008_20250721112601921_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250721112601921_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Attach the cap to the pen in left hand with right hand.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319008_20250721112601921_RAW/segment_6_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250721112601921_RAW/segment_6_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the towel on the left side of the sink with your left hand.<br><br>Bathroom / Bedding / Pick", "src": "processed/extracted_videos_500/RB250319008_20250721204501696_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250721204501696_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-1", "object_id": "object-8"}'),
+JSON.parse('{"info": "Place the towel into the basket with the right hand.<br><br>Bathroom / Bedding / Throw", "src": "processed/extracted_videos_500/RB250319008_20250721204501696_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250721204501696_RAW/segment_3_resized.jpg", "scene_id": "scene-5", "task_id": "task-8", "object_id": "object-8"}'),
+JSON.parse('{"info": "Raise the torso to face the sink.<br><br>Bathroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319008_20250721204501696_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250721204501696_RAW/segment_4_resized.jpg", "scene_id": "scene-5", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the towel in the middle of the sink with right hand and place it in the basket.<br><br>Bathroom / Bedding / Throw", "src": "processed/extracted_videos_500/RB250319008_20250721204501696_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250721204501696_RAW/segment_5_resized.jpg", "scene_id": "scene-5", "task_id": "task-8", "object_id": "object-8"}'),
+JSON.parse('{"info": "Place the towel on the right side of the sink into the basket with your right hand.<br><br>Bathroom / Bedding / Throw", "src": "processed/extracted_videos_500/RB250319008_20250721204501696_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250721204501696_RAW/segment_7_resized.jpg", "scene_id": "scene-5", "task_id": "task-8", "object_id": "object-8"}'),
+JSON.parse('{"info": "Pick up the towel with the right hand.<br><br>Bathroom / Bedding / Pick", "src": "processed/extracted_videos_500/RB250319008_20250722213922060_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250722213922060_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-1", "object_id": "object-8"}'),
+JSON.parse('{"info": "Raise the torso to align with the shelf level.<br><br>Bathroom / Other / Move Torso", "src": "processed/extracted_videos_500/RB250319008_20250722213922060_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250722213922060_RAW/segment_2_resized.jpg", "scene_id": "scene-5", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Place the towel on the shelf with the right hand.<br><br>Bathroom / Bedding / Other", "src": "processed/extracted_videos_500/RB250319008_20250722213922060_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250722213922060_RAW/segment_3_resized.jpg", "scene_id": "scene-5", "task_id": "task-9", "object_id": "object-8"}'),
+JSON.parse('{"info": "Pick up the towel with the right hand. Place the towel on the basket with the right hand.<br><br>Bathroom / Bedding / Place", "src": "processed/extracted_videos_500/RB250319008_20250722213922060_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250722213922060_RAW/segment_4_resized.jpg", "scene_id": "scene-5", "task_id": "task-2", "object_id": "object-8"}'),
+JSON.parse('{"info": "Pick up the kettle with the right hand. Pour water into the back cup. Pour water into the front cup. Put the kettle back in place with the right hand.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319008_20250724195854006_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250724195854006_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the front cup on the table with right hand and pour water into the plastic box. Place the cup back to its original position with right hand.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319008_20250724195854006_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250724195854006_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the rear cup on the table with right hand and pour the water into the plastic box. Place the cup back to its original position with right hand.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319008_20250724195854006_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250724195854006_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the vase on the right side of the table with your right hand and place it in the center of the table.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250725135907183_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250725135907183_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the flower on the table with left hand and place it into the vase<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250725135907183_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250725135907183_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the flower on the table with left hand and place it into the vase.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250725135907183_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250725135907183_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Take the flowers from the vase with the right hand and place them on the right side of the table.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250725135907183_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250725135907183_RAW/segment_7_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Take the flowers from the vase with the right hand and place them on the right side of the table.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250725135907183_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250725135907183_RAW/segment_8_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Fully open the left door of the TV cabinet with both hands.<br><br>Living Room / Door / Open", "src": "processed/extracted_videos_500/RB250319008_20250728165235847_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250728165235847_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Pick up the transparent jar with the right hand and place it on the upper shelf to the left side of the TV cabinet.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250728165235847_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250728165235847_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the jar with the orange lid using your right hand and place it on the top shelf to the left of the TV cabinet.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250728165235847_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250728165235847_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Fully close the left door of the TV cabinet with the left hand.<br><br>Living Room / Door / Close", "src": "processed/extracted_videos_500/RB250319008_20250728165235847_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250728165235847_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Pick up the jar with the orange lid using your right hand and place it on the TV stand counter.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250728165235847_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250728165235847_RAW/segment_7_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the drink with the left hand.<br><br>Living Room / Other / Pick", "src": "processed/extracted_videos_500/RB250319008_20250731170738919_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250731170738919_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-1", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the kettle with the left hand, then fully open the lid with the right hand.<br><br>Kitchen / Kitchenware / Open", "src": "processed/extracted_videos_500/RB250319008_20250801120737456_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250801120737456_RAW/segment_1_resized.jpg", "scene_id": "scene-1", "task_id": "task-5", "object_id": "object-3"}'),
+JSON.parse('{"info": "Hold the kettle under the faucet with left hand.<br><br>Kitchen / Kitchenware / Other", "src": "processed/extracted_videos_500/RB250319008_20250801120737456_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250801120737456_RAW/segment_2_resized.jpg", "scene_id": "scene-1", "task_id": "task-9", "object_id": "object-3"}'),
+JSON.parse('{"info": "Turn on the faucet with the right hand.<br><br>Kitchen / Kitchenware / Other", "src": "processed/extracted_videos_500/RB250319008_20250801120737456_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250801120737456_RAW/segment_3_resized.jpg", "scene_id": "scene-1", "task_id": "task-9", "object_id": "object-3"}'),
+JSON.parse('{"info": "Close the faucet with the right hand.<br><br>Kitchen / Kitchenware / Other", "src": "processed/extracted_videos_500/RB250319008_20250801120737456_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250801120737456_RAW/segment_4_resized.jpg", "scene_id": "scene-1", "task_id": "task-9", "object_id": "object-3"}'),
+JSON.parse('{"info": "Place the kettle on the base with left hand and close the lid.<br><br>Kitchen / Kitchenware / Place", "src": "processed/extracted_videos_500/RB250319008_20250801120737456_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250801120737456_RAW/segment_5_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-3"}'),
+JSON.parse('{"info": "Pick up the thermos with the left hand.<br><br>Kitchen / Kitchenware / Pick", "src": "processed/extracted_videos_500/RB250319008_20250801174643125_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250801174643125_RAW/segment_1_resized.jpg", "scene_id": "scene-1", "task_id": "task-1", "object_id": "object-3"}'),
+JSON.parse('{"info": "Pour water into the white transparent cup with the left hand.<br><br>Kitchen / Kitchenware / Other", "src": "processed/extracted_videos_500/RB250319008_20250801174643125_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250801174643125_RAW/segment_2_resized.jpg", "scene_id": "scene-1", "task_id": "task-9", "object_id": "object-3"}'),
+JSON.parse('{"info": "Pour the water into the yellow transparent cup with the left hand.<br><br>Kitchen / Kitchenware / Other", "src": "processed/extracted_videos_500/RB250319008_20250801174643125_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250801174643125_RAW/segment_3_resized.jpg", "scene_id": "scene-1", "task_id": "task-9", "object_id": "object-3"}'),
+JSON.parse('{"info": "Place the hot water pot back in position with the left hand.<br><br>Kitchen / Kitchenware / Place", "src": "processed/extracted_videos_500/RB250319008_20250801174643125_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250801174643125_RAW/segment_4_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-3"}'),
+JSON.parse('{"info": "Use both hands to unzip the tool bag and open its mouth.<br><br>Living Room / Other / Open", "src": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the drill with the right hand and place it in the tool bag.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the voltage tester with the right hand and place it in the tool bag.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the voltage tester with the right hand and place it into the tool bag.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the screwdriver with the right hand and place it in the tool bag.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_5_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Use both hands to zip up.<br><br>Living Room / Other / Close", "src": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250804151433264_RAW/segment_8_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Close the left curtain with the left hand.<br><br>Living Room / Bedding / Open", "src": "processed/extracted_videos_500/RB250319008_20250804170506587_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250804170506587_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-8"}'),
+JSON.parse('{"info": "Close the right curtain with the right hand.<br><br>Living Room / Bedding / Open", "src": "processed/extracted_videos_500/RB250319008_20250804170506587_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250804170506587_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-8"}'),
+JSON.parse('{"info": "Open the left curtain with the left hand<br><br>Living Room / Bedding / Close", "src": "processed/extracted_videos_500/RB250319008_20250804170506587_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250804170506587_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-8"}'),
+JSON.parse('{"info": "Open the right curtain with the right hand.<br><br>Living Room / Bedding / Close", "src": "processed/extracted_videos_500/RB250319008_20250804170506587_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250804170506587_RAW/segment_4_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-8"}'),
+JSON.parse('{"info": "Fully open the left drawer with the left hand.<br><br>Living Room / Other / Open", "src": "processed/extracted_videos_500/RB250319008_20250805165605095_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250805165605095_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the white remote control with the right hand and place it in the drawer.<br><br>Living Room / Other / Place", "src": "processed/extracted_videos_500/RB250319008_20250805165605095_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250805165605095_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Fully close the left drawer with the right hand.<br><br>Living Room / Other / Close", "src": "processed/extracted_videos_500/RB250319008_20250805165605095_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319008_20250805165605095_RAW/segment_3_resized.jpg", "scene_id": "scene-3", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Raise the torso. Pick up the steamer with the right hand.<br><br>Laundry Room / Other / Pick", "src": "processed/extracted_videos_500/RB250319014_20250718150724705_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319014_20250718150724705_RAW/segment_1_resized.jpg", "scene_id": "scene-6", "task_id": "task-1", "object_id": "object-9"}'),
+JSON.parse('{"info": "Lower the torso. Pull the left hem of the short sleeve with the left hand. Iron the left side of the short sleeve with the hanging ironing machine using the right hand.<br><br>Laundry Room / Cloth / Other", "src": "processed/extracted_videos_500/RB250319014_20250718150724705_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319014_20250718150724705_RAW/segment_2_resized.jpg", "scene_id": "scene-6", "task_id": "task-9", "object_id": "object-2"}'),
+JSON.parse('{"info": "Hold the right hem of the short sleeve with the left hand. Iron the right side of the short sleeve with the hanging ironing machine using the right hand.<br><br>Laundry Room / Cloth / Other", "src": "processed/extracted_videos_500/RB250319014_20250718150724705_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319014_20250718150724705_RAW/segment_3_resized.jpg", "scene_id": "scene-6", "task_id": "task-9", "object_id": "object-2"}'),
+JSON.parse('{"info": "Raise the torso. Return the garment steamer to its original position with the right hand.<br><br>Laundry Room / Other / Place", "src": "processed/extracted_videos_500/RB250319014_20250718150724705_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319014_20250718150724705_RAW/segment_4_resized.jpg", "scene_id": "scene-6", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Grip the towel on the left side of the washstand with the right hand.<br><br>Bathroom / Bedding / Pick", "src": "processed/extracted_videos_500/RB250319021_20250725163431554_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250725163431554_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-1", "object_id": "object-8"}'),
+JSON.parse('{"info": "Grip the leftmost towel on the left side of the washstand with the left hand.<br><br>Bathroom / Bedding / Pick", "src": "processed/extracted_videos_500/RB250319021_20250725163431554_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250725163431554_RAW/segment_2_resized.jpg", "scene_id": "scene-5", "task_id": "task-1", "object_id": "object-8"}'),
+JSON.parse('{"info": "Place the towel into the basket with the right hand.<br><br>Bathroom / Bedding / Throw", "src": "processed/extracted_videos_500/RB250319021_20250725163431554_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250725163431554_RAW/segment_3_resized.jpg", "scene_id": "scene-5", "task_id": "task-8", "object_id": "object-8"}'),
+JSON.parse('{"info": "Place the towel into the basket with the left hand.<br><br>Bathroom / Bedding / Throw", "src": "processed/extracted_videos_500/RB250319021_20250725163431554_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250725163431554_RAW/segment_4_resized.jpg", "scene_id": "scene-5", "task_id": "task-8", "object_id": "object-8"}'),
+JSON.parse('{"info": "Collaborate with both hands to fully open the bathroom door.<br><br>Bathroom / Door / Open", "src": "processed/extracted_videos_500/RB250319021_20250725200328559_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250725200328559_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Collaborate with both hands to fully close the bathroom door.<br><br>Bathroom / Door / Close", "src": "processed/extracted_videos_500/RB250319021_20250725200328559_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250725200328559_RAW/segment_2_resized.jpg", "scene_id": "scene-5", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Pick up the plug of the lamp on the table with the right hand and insert it into the single-phase two-hole socket.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319021_20250726163115238_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250726163115238_RAW/segment_1_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Press the switch with right hand to turn on the light.<br><br>Living Room / Other / Other", "src": "processed/extracted_videos_500/RB250319021_20250726163115238_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250726163115238_RAW/segment_2_resized.jpg", "scene_id": "scene-3", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Open the safe with left hand<br><br>Bedroom / Door / Open", "src": "processed/extracted_videos_500/RB250319021_20250728111658999_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250728111658999_RAW/segment_1_resized.jpg", "scene_id": "scene-2", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Place the item on the top left of the safe into the left side of the safe with your left hand.<br><br>Bedroom / Other / Place", "src": "processed/extracted_videos_500/RB250319021_20250728111658999_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250728111658999_RAW/segment_2_resized.jpg", "scene_id": "scene-2", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Close the safe with left hand<br><br>Bedroom / Door / Close", "src": "processed/extracted_videos_500/RB250319021_20250728111658999_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250728111658999_RAW/segment_3_resized.jpg", "scene_id": "scene-2", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Pull the left curtain to the right with the left hand until it reaches the wall between the two windows.<br><br>Bedroom / Other / Close", "src": "processed/extracted_videos_500/RB250319021_20250728191553526_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250728191553526_RAW/segment_1_resized.jpg", "scene_id": "scene-2", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pull the right curtain to the left with your right hand until there is no gap between the curtains.<br><br>Bedroom / Other / Close", "src": "processed/extracted_videos_500/RB250319021_20250728191553526_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/RB250319021_20250728191553526_RAW/segment_2_resized.jpg", "scene_id": "scene-2", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Hook the washing machine door with the right hand and partially open it.<br><br>Laundry Room / Door / Open", "src": "processed/extracted_videos_500/S2RL1009P25149_20250718122314708_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250718122314708_RAW/segment_2_resized.jpg", "scene_id": "scene-6", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Fully open the washing machine door with the left hand.<br><br>Laundry Room / Door / Open", "src": "processed/extracted_videos_500/S2RL1009P25149_20250718122314708_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250718122314708_RAW/segment_3_resized.jpg", "scene_id": "scene-6", "task_id": "task-5", "object_id": "object-4"}'),
+JSON.parse('{"info": "Place the denim clothes into the washing machine with the right hand.<br><br>Laundry Room / Cloth / Pick", "src": "processed/extracted_videos_500/S2RL1009P25149_20250718122314708_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250718122314708_RAW/segment_5_resized.jpg", "scene_id": "scene-6", "task_id": "task-1", "object_id": "object-2"}'),
+JSON.parse('{"info": "Place the denim clothes into the washing machine with the right hand.<br><br>Laundry Room / Cloth / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250718122314708_RAW/segment_7_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250718122314708_RAW/segment_7_resized.jpg", "scene_id": "scene-6", "task_id": "task-2", "object_id": "object-2"}'),
+JSON.parse('{"info": "Tilt body backward. Move body away from the washing machine.<br><br>Laundry Room / Door / Close", "src": "processed/extracted_videos_500/S2RL1009P25149_20250718122314708_RAW/segment_8_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250718122314708_RAW/segment_8_resized.jpg", "scene_id": "scene-6", "task_id": "task-6", "object_id": "object-4"}'),
+JSON.parse('{"info": "Open the left-hand storage box<br><br>Bathroom / Other / Other", "src": "processed/extracted_videos_500/S2RL1009P25149_20250721120138362_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250721120138362_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the black toothbrush bag on the left side of the table with your left hand and place it into the storage box.<br><br>Bathroom / Other / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250721120138362_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250721120138362_RAW/segment_2_resized.jpg", "scene_id": "scene-5", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the black toothbrush bag on the left side of the table with your left hand and place it into the storage box.<br><br>Bathroom / Other / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250721120138362_RAW/segment_3_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250721120138362_RAW/segment_3_resized.jpg", "scene_id": "scene-5", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the black toothbrush bag on the table with left hand and place it into the storage box.<br><br>Bathroom / Other / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250721120138362_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250721120138362_RAW/segment_4_resized.jpg", "scene_id": "scene-5", "task_id": "task-2", "object_id": "object-9"}'),
+JSON.parse('{"info": "Close the left-hand storage box.<br><br>Bathroom / Other / Other", "src": "processed/extracted_videos_500/S2RL1009P25149_20250721120138362_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250721120138362_RAW/segment_5_resized.jpg", "scene_id": "scene-5", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Turn on the faucet with the right hand.<br><br>Bathroom / Other / Open", "src": "processed/extracted_videos_500/S2RL1009P25149_20250721142901082_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250721142901082_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-5", "object_id": "object-9"}'),
+JSON.parse('{"info": "Close the faucet with the right hand.<br><br>Bathroom / Other / Close", "src": "processed/extracted_videos_500/S2RL1009P25149_20250721142901082_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250721142901082_RAW/segment_2_resized.jpg", "scene_id": "scene-5", "task_id": "task-6", "object_id": "object-9"}'),
+JSON.parse('{"info": "Use the cloth in your right hand to wipe the ink off the sink.<br><br>Bathroom / Other / Wipe", "src": "processed/extracted_videos_500/S2RL1009P25149_20250721142901082_RAW/segment_4_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250721142901082_RAW/segment_4_resized.jpg", "scene_id": "scene-5", "task_id": "task-7", "object_id": "object-9"}'),
+JSON.parse('{"info": "Adjust the shoe position with the left hand.<br><br>Bathroom / Shoes / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250722122539800_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250722122539800_RAW/segment_1_resized.jpg", "scene_id": "scene-5", "task_id": "task-2", "object_id": "object-7"}'),
+JSON.parse('{"info": "Place the shoe into the shoebox with left hand.<br><br>Bathroom / Shoes / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250722122539800_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250722122539800_RAW/segment_2_resized.jpg", "scene_id": "scene-5", "task_id": "task-2", "object_id": "object-7"}'),
+JSON.parse('{"info": "Return to the home position<br><br>Bathroom / Other / Move Torso", "src": "processed/extracted_videos_500/S2RL1009P25149_20250722122539800_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250722122539800_RAW/segment_5_resized.jpg", "scene_id": "scene-5", "task_id": "task-3", "object_id": "object-9"}'),
+JSON.parse('{"info": "Open the air conditioner with the right hand and adjust the temperature<br><br>Bedroom / Other / Other", "src": "processed/extracted_videos_500/S2RL1009P25149_20250722162115549_RAW/segment_1_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250722162115549_RAW/segment_1_resized.jpg", "scene_id": "scene-2", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Close the air conditioner with the right hand.<br><br>Bedroom / Other / Other", "src": "processed/extracted_videos_500/S2RL1009P25149_20250722162115549_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250722162115549_RAW/segment_2_resized.jpg", "scene_id": "scene-2", "task_id": "task-9", "object_id": "object-9"}'),
+JSON.parse('{"info": "Pick up the food with the right hand and place it in the microwave.<br><br>Kitchen / Food / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250723175654620_RAW/segment_2_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250723175654620_RAW/segment_2_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-6"}'),
+JSON.parse('{"info": "Pick up the food with the right hand and place it on the tray.<br><br>Kitchen / Food / Place", "src": "processed/extracted_videos_500/S2RL1009P25149_20250723175654620_RAW/segment_5_resized.mp4", "poster": "processed/extracted_videos_500/S2RL1009P25149_20250723175654620_RAW/segment_5_resized.jpg", "scene_id": "scene-1", "task_id": "task-2", "object_id": "object-6"}'),
+    ];
+
+    const filters = [
+      'scene',
+      'object',
+      'task',
+    ];
+
+    const maxVisibleVideos = 40;
+
+    // Cache references to DOM elements
+    const infoTextElement = document.getElementById('info-text');
+    const resampleButton = document.getElementById('resample-button');
+    const videoGrid = document.getElementById('video-grid');
+    const videoElements = document.querySelectorAll('video');
+    const videoOverlays = document.querySelectorAll('.video-overlay');
+    const videoOverlaySpans = document.querySelectorAll('.video-overlay span');
+
+    // Cache references to filter DOM elements
+    const filterElements = {};
+    filters.forEach(filter => {
+      const checkboxes = document.querySelectorAll(`.${filter}-checkbox`);
+      const checkboxLabels = {};
+      const checkboxCounts = {};
+      checkboxes.forEach(checkbox => {
+        checkboxLabels[checkbox.id] = document.querySelector(`label[for='${checkbox.id}']`);;
+        checkboxCounts[checkbox.id] = document.getElementById(`${checkbox.id}-count`);
+      });
+      const allCheckbox = document.getElementById(`${filter}-all-checkbox`);
+      const allCheckboxCount = document.getElementById(`${filter}-all-count`)
+      filterElements[filter] = { checkboxes, checkboxLabels, checkboxCounts, allCheckbox, allCheckboxCount };
+    });
+
+    // Function to perform Fisher-Yates shuffle algorithm
+    function fisherYatesShuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Generate array of indices for shuffling
+    const indices = Array.from({ length: videos.length }, (_, index) => index)
+    fisherYatesShuffle(indices)
+
+    // Create an IntersectionObserver to lazily load videos when they come into view
+    const lazyVideoObserver = new IntersectionObserver(function(entries, observer) {
+      entries.forEach(function(video) {
+        if (video.isIntersecting) {
+          video.target.load();
+          observer.unobserve(video.target);
+        }
+      });
+    });
+
+    // Function to get selected filters
+    function getSelectedValues(checkboxes) {
+      return Array.from(checkboxes).filter(filter => filter.checked).map(filter => filter.id);
+    }
+
+    // Function to filter videos based on selected filters
+    function filterVideos() {
+      // console.time('filterVideos');
+
+      // Stop all video observers
+      lazyVideoObserver.disconnect();
+
+      // Hide the video grid temporarily to facilitate batch-like editing of the DOM
+      videoGrid.style.display = 'none';
+
+      // Get selected values for each filter
+      const selectedValuesPerFilter = {};
+      filters.forEach(filter => {
+        selectedValuesPerFilter[filter] = new Set(getSelectedValues(filterElements[filter].checkboxes));
+      });
+
+      // Initialize object to keep track of remaining counts for each filter value
+      const remainingCounts = {};
+      filters.forEach(filter => {
+        remainingCounts[filter] = {};
+        filterElements[filter].checkboxes.forEach(checkbox => {
+          remainingCounts[filter][checkbox.id] = 0;
+          remainingCounts[filter]['all'] = 0;
+        });
+      });
+
+      // Iterate through shuffled videos and apply filters
+      let visibleCount = 0, totalCount = 0;
+      let video, matchStatusArray, selectedValues, filterIndex, filter;
+      for (let i = 0; i < indices.length; i++) { // Slow
+        video = videos[indices[i]];
+
+        // Generate match status array for each filter
+        matchStatusArray = [];
+        for (filterIndex = 0; filterIndex < filters.length; filterIndex++) {
+          filter = filters[filterIndex];
+          selectedValues = selectedValuesPerFilter[filters[filterIndex]];
+          matchStatusArray.push(selectedValues.size === 0 || selectedValues.has(video[`${filter}_id`]));
+        }
+
+        // Increment remaining counts applicable filter values
+        for (filterIndex = 0; filterIndex < filters.length; filterIndex++) {
+          // Ignoring current filter, check if all other filters match
+          filter = filters[filterIndex];
+          if (matchStatusArray.every((status, statusIndex) => statusIndex === filterIndex || status)) {
+            remainingCounts[filter][video[`${filter}_id`]]++;
+            remainingCounts[filter]['all']++;
+          }
+        }
+
+        // Show videos that match all filters
+        if (matchStatusArray.every(status => status)) {
+          if (visibleCount < maxVisibleVideos) {
+            // Set source and poster of the video element
+            videoElements[visibleCount].src = video.src;
+            videoElements[visibleCount].poster = video.poster;
+
+            // Make the video element visible
+            videoElements[visibleCount].style.display = '';
+
+            // Start observing the video element for lazy loading
+            lazyVideoObserver.observe(videoElements[visibleCount]);
+
+            // Update the video overlay
+            videoOverlaySpans[visibleCount].innerHTML = video.info; // Note that .textContent does not render HTML elements like <br>
+            videoOverlays[visibleCount].style.display = '';
+
+            visibleCount++;
+          }
+          totalCount++;
+        }
+      }
+
+      // Hide any unused video containers
+      for (let i = visibleCount; i < maxVisibleVideos; i++) {
+        videoElements[i].style.display = 'none';
+        videoElements[i].src = '';
+        videoElements[i].poster = '';
+        videoOverlaySpans[i].innerHTML = '';
+        videoOverlays[i].style.display = 'none';
+      }
+
+      // Reveal the video grid after applying DOM edits
+      videoGrid.style.display = '';
+
+      // Update checkbox labels to show remaining counts
+      filters.forEach(filter => {
+        filterElements[filter].checkboxes.forEach(checkbox => {
+          const label = filterElements[filter].checkboxLabels[checkbox.id];
+          const count = remainingCounts[filter][checkbox.id];
+          filterElements[filter].checkboxCounts[checkbox.id].textContent = count;
+          if (count === 0) {
+            checkbox.disabled = true;
+            label.classList.add('text-muted');
+          } else {
+            checkbox.disabled = false;
+            label.classList.remove('text-muted');
+          }
+        });
+        filterElements[filter].allCheckboxCount.textContent = remainingCounts[filter]['all'];
+      });
+
+      // Update info text and button visibility
+      if (visibleCount === totalCount) {
+        infoTextElement.textContent = `Showing ${totalCount} matches`
+        resampleButton.style.display = 'none';
+      } else {
+        infoTextElement.textContent = `Showing ${visibleCount} matches randomly sampled from ${totalCount} total matches`
+        resampleButton.style.display = '';
+      }
+
+      // Reshuffle indices
+      fisherYatesShuffle(indices);
+
+      // console.timeEnd('filterVideos');
+    }
+
+    // Function to set up listener for each group of checkboxes
+    function setupCheckboxGroupListener(checkboxGroupId, checkboxes, allCheckbox) {
+      document.getElementById(checkboxGroupId).addEventListener('change', function(event) {
+        // console.time('checkboxGroupEventListener');
+        if (event.target === allCheckbox) {
+          const noneSelected = Array.from(checkboxes).every(checkbox => !checkbox.checked);
+          if (noneSelected) allCheckbox.checked = true;
+
+          if (allCheckbox.checked) {
+            for (const checkbox of checkboxes) {
+              checkbox.checked = false;
+            }
+          }
+          filterVideos();
+        } else if (event.target.type === 'checkbox') {
+          const anySelected = getSelectedValues(checkboxes).length > 0;
+          allCheckbox.checked = !anySelected;
+          filterVideos();
+        }
+        // console.timeEnd('checkboxGroupEventListener');
+      });
+    }
+
+    // Set up event listener for checkbox group
+    filters.forEach(filter => {
+      const { checkboxes, allCheckbox } = filterElements[filter];
+      setupCheckboxGroupListener(`${filter}-checkbox-group`, checkboxes, allCheckbox);
+    });
+
+    // Add a click event listener to the "Resample" button
+    resampleButton.addEventListener('click', filterVideos);
+
+    // Initial filtering of videos
+    filterVideos();
+
+    // Hide page overlay used for preventing user interaction until DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('page-overlay').style.display = 'none';
+    });
+  </script>
+</body>
+</html>
