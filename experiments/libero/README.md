@@ -97,8 +97,21 @@ Common options, with the full list documented in the script header:
 | `--num_trials` | 50 | Number of trials per task. |
 | `--num_parallel` | 10 | Number of parallel environments per client. |
 | `--suites` | all 4 suites | Space-separated suite names. |
+| `--ensemble` | off | Average overlapping action predictions before executing each 10-step window. |
 | `--save_videos` | off | Save rollout videos. |
 | `key=value` | - | Hydra override forwarded to the server. |
+
+For training runs that do not contain `.hydra/config.yaml`, pass the original
+task YAML explicitly. The server then loads `dataset_stats.json` and
+`action_tokenizer.pt` from the checkpoint run directory:
+
+```bash
+bash scripts/run/eval_libero.sh runs/my_run/checkpoints/step_28000.pt \
+    --task_config configs/task/libero_ar.yaml \
+    --suites "libero_goal" \
+    --num_trials 1 \
+    --num_parallel 1
+```
 
 ## Output Layout
 

@@ -44,7 +44,11 @@ from g05.utils.config.config_resolvers import register_default_resolvers
 register_default_resolvers()
 
 from g05.models.g05.inferencer import PolicyInferencer
-from g05.utils.checkpoint.ckpt_utils import find_run_dir, load_config_from_run_dir
+from g05.utils.checkpoint.ckpt_utils import (
+    find_run_dir,
+    load_config_from_run_dir,
+    load_config_from_task_yaml,
+)
 from g05.utils.eval.eval_utils import filter_embodiment
 from g05.utils.common.pytorch_utils import dict_apply
 from g05.utils.websocket import packb, unpackb
@@ -357,12 +361,18 @@ class EnsembleChunkedPolicyWrapper:
         self._steps_since_recompute = 0
         self._last_recompute_step = 0
         self._ensemble_buf: dict[str, dict[int, deque]] = {}
-        self._last_raw_chunk: dict | None = None
+        self._last_ensemble_chunk: dict | None = None
         self._cot_text = None
 
     def set_step(self, step: int) -> None:
         self._global_step = step
         self._steps_since_recompute = step - self._last_recompute_step
+        # The LIBERO client executes a whole action_steps-sized chunk locally,
+        # so the server can jump from (for example) step 0 directly to step 10.
+        # Predictions before the reported step can no longer contribute.
+        for part, ts_map in self._ensemble_buf.items():
+            self._ensemble_buf[part] = {ts: preds for ts, preds in ts_map.items() if ts >= step}
+        self._ensemble_buf = {part: ts_map for part, ts_map in self._ensemble_buf.items() if ts_map}
 
     @property
     def need_obs(self) -> bool:
@@ -377,10 +387,24 @@ class EnsembleChunkedPolicyWrapper:
 
     @property
     def full_chunk(self) -> dict | None:
-        return self._last_raw_chunk
+        return self._last_ensemble_chunk
+
+    def _build_execution_chunk(self) -> dict[str, np.ndarray]:
+        """Average the bank for the next locally executed action window."""
+        result = {}
+        for part, ts_map in self._ensemble_buf.items():
+            averaged = []
+            for offset in range(self.action_steps):
+                preds = ts_map.get(self._global_step + offset)
+                if preds is None or len(preds) == 0:
+                    break
+                averaged.append(np.stack(list(preds)).mean(axis=0))
+            if averaged:
+                result[part] = np.stack(averaged)
+        return result
 
     async def get_action(self, raw_obs: dict) -> tuple[dict, str | None]:
-        self._last_raw_chunk = None
+        self._last_ensemble_chunk = None
         if self.need_obs:
             if not raw_obs:
                 raise ValueError("need obs for recompute but got empty")
@@ -396,6 +420,9 @@ class EnsembleChunkedPolicyWrapper:
             absent_keys = action.pop("_absent_keys", set())
             for key in absent_keys:
                 action.pop(key, None)
+                # An absent part is semantically a no-op for this decode. Do not
+                # resurrect older predictions for it in the fused client chunk.
+                self._ensemble_buf.pop(key, None)
             if absent_keys:
                 logger.warning(
                     "Dropped absent action keys %s (emb=%s); client must handle missing keys.",
@@ -406,7 +433,6 @@ class EnsembleChunkedPolicyWrapper:
                 action,
                 lambda x: x[0].numpy() if isinstance(x, torch.Tensor) else x,
             )
-            self._last_raw_chunk = chunk
             start = self._global_step
             chunk_len = None
             for part, arr in chunk.items():
@@ -421,6 +447,10 @@ class EnsembleChunkedPolicyWrapper:
                     if abs_t not in self._ensemble_buf[part]:
                         self._ensemble_buf[part][abs_t] = deque()
                     self._ensemble_buf[part][abs_t].append(arr[t])
+            # Return the fused window, not the newest raw model prediction.
+            # The client caches this chunk and executes it without contacting
+            # the server again until the next recompute boundary.
+            self._last_ensemble_chunk = self._build_execution_chunk()
             logger.info(
                 "Ensemble recompute: %.1fms (chunk covers steps %d..%d)",
                 (time.monotonic() - t0) * 1000,
@@ -451,6 +481,7 @@ class EnsembleChunkedPolicyWrapper:
         self._global_step = 0
         self._steps_since_recompute = 0
         self._last_recompute_step = 0
+        self._last_ensemble_chunk = None
         self._cot_text = None
 
 
@@ -599,6 +630,11 @@ def main():
         description="WebSocket policy server with dynamic batch inference"
     )
     parser.add_argument("--ckpt_path", required=True, help="Path to checkpoint file")
+    parser.add_argument(
+        "--task_config",
+        default=None,
+        help="Task config YAML to use when the checkpoint run has no .hydra/config.yaml",
+    )
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--device", default="cuda", help="CUDA device for model inference")
@@ -642,10 +678,13 @@ def main():
 
     overrides = [r for r in remaining if "=" in r]
 
-    run_dir = find_run_dir(args.ckpt_path)
-    print(f"Found run dir: {run_dir}")
-
-    cfg = load_config_from_run_dir(run_dir, args.ckpt_path, overrides)
+    if args.task_config:
+        cfg = load_config_from_task_yaml(args.task_config, args.ckpt_path, overrides)
+        print(f"Loaded config from task YAML: {args.task_config}")
+    else:
+        run_dir = find_run_dir(args.ckpt_path)
+        print(f"Found run dir: {run_dir}")
+        cfg = load_config_from_run_dir(run_dir, args.ckpt_path, overrides)
 
     eval_embodiment = cfg.get("eval_embodiment", None)
     if eval_embodiment and "embodiment_datasets" in cfg.data:

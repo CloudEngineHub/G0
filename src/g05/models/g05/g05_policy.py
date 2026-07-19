@@ -509,6 +509,32 @@ class G05Policy(BasePolicy):
             ids.append(pad)
         return ids or None
 
+    def _get_action_stop_token_ids(self) -> Optional[List[int]]:
+        """Return terminal tokens for the serialized discrete-action segment.
+
+        Action samples are trained as ``...<action_action>|<eos>`` and decode_ar
+        uses the first ``|`` as the authoritative action boundary. Waiting only
+        for EOS wastes decode steps when the model has already completed a valid
+        action, and is especially costly for heterogeneous batches.
+        """
+        ids = []
+        eos = getattr(self.model_config, "eos_token_id", None)
+        if eos is not None:
+            ids.append(int(eos))
+
+        tokenizer = getattr(self.processor, "tokenizer", None)
+        if tokenizer is not None:
+            delimiter_ids = tokenizer.encode("|", add_special_tokens=False)
+            if len(delimiter_ids) == 1:
+                ids.append(int(delimiter_ids[0]))
+            else:
+                logger.warning(
+                    "Action delimiter '|' is not a single token (%s); falling back to EOS stop",
+                    delimiter_ids,
+                )
+
+        return list(dict.fromkeys(ids)) or None
+
     def _get_action_generation_max_new_tokens(self) -> int:
         """Return a safe token budget for the discrete action AR stage."""
         ar_default = int(getattr(self.model.ar_helper, "max_new_tokens", 300) or 300)
@@ -888,6 +914,7 @@ class G05Policy(BasePolicy):
                 state.pixel_values,
                 past_key_values=state.kv_cache,
                 return_kv_cache=True,
+                stop_token_ids=self._get_action_stop_token_ids(),
                 max_new_tokens=self._get_action_generation_max_new_tokens(),
             )
             _sync_if_cuda_available()

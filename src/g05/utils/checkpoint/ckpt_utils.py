@@ -82,6 +82,32 @@ def _apply_hf_processor_sidecar(cfg: DictConfig, run_dir: Path):
         cfg.model.processor.tokenizer_params.pretrained_model_name_or_path = str(local_hf)
 
 
+def _apply_action_tokenizer_sidecar(cfg: DictConfig, run_dir: Path) -> bool:
+    """Use ``run_dir/action_tokenizer.pt`` for every supported config layout.
+
+    Training copies the tokenizer checkpoint into the run directory, so serving
+    from a task YAML should not depend on the original training-machine path.
+    Both the root ``tokenizer`` node and the model-expanded copy are patched
+    when present; legacy ``AT_CONFIG`` is supported for exported checkpoints.
+    """
+    local_at = Path(run_dir) / "action_tokenizer.pt"
+    if not local_at.exists():
+        return False
+
+    patched = False
+    for key in (
+        "tokenizer.vq_config.ckpt_dir",
+        "model.tokenizer.vq_config.ckpt_dir",
+        "model.model_arch.AT_CONFIG.ckpt_dir",
+    ):
+        if OmegaConf.select(cfg, key) is not None:
+            OmegaConf.update(cfg, key, str(local_at), merge=False)
+            patched = True
+    if patched:
+        logger.info(f"Auto-resolved action_tokenizer → {local_at}")
+    return patched
+
+
 def _patch_g05_compat(cfg: DictConfig) -> None:
     target = cfg.get("model", {}).get("model_arch", {}).get("_target_", "")
     if target != "g05.models.g05.g05_policy.G05Policy":
@@ -159,14 +185,7 @@ def load_config_from_run_dir(run_dir: Path, ckpt_path: str, overrides: list[str]
     # Auto-detect action_tokenizer.pt copied by finetune.py into run_dir.
     # .hydra/config.yaml is saved before finetune.py copies & updates ckpt_dir,
     # so the saved config still points to the original (possibly unreachable) path.
-    local_at = run_dir / "action_tokenizer.pt"
-    if local_at.exists():
-        try:
-            cfg.model.tokenizer.vq_config.ckpt_dir = str(local_at)
-            logger.info(f"{_GREEN}🎯 Auto-resolved action_tokenizer → {local_at}{_RESET}")
-        except Exception:
-            pass  # config has no tokenizer.vq_config.ckpt_dir — skip
-    else:
+    if not _apply_action_tokenizer_sidecar(cfg, run_dir):
         logger.info(f"{_YELLOW}⚠️  No local action_tokenizer.pt found, using config default{_RESET}")
 
     # register_default_resolvers already handles oc.load, eval, split, etc.
@@ -231,9 +250,6 @@ def load_config_from_task_yaml(task_yaml: str, ckpt_path: str, overrides: list[s
             ],
         )
     OmegaConf.set_struct(cfg, False)
-    if overrides:
-        cfg = OmegaConf.merge(cfg, OmegaConf.from_dotlist(overrides))
-        logger.info(f"{_GREEN}⚙️  Applied {len(overrides)} override(s): {overrides}{_RESET}")
     OmegaConf.resolve(cfg)
     cfg = OmegaConf.create(OmegaConf.to_container(cfg, resolve=True))
     OmegaConf.set_struct(cfg, False)
@@ -248,6 +264,14 @@ def load_config_from_task_yaml(task_yaml: str, ckpt_path: str, overrides: list[s
     logger.info(f"{_CYAN}🔖 Checkpoint: {ckpt_stem}{_RESET}")
 
     _apply_hf_processor_sidecar(cfg, Path(cfg.run_dir))
+    if not _apply_action_tokenizer_sidecar(cfg, Path(cfg.run_dir)):
+        logger.info(f"{_YELLOW}⚠️  No local action_tokenizer.pt found, using task config default{_RESET}")
+
+    # Explicit CLI overrides take precedence over automatically discovered
+    # sidecars, matching load_config_from_run_dir.
+    if overrides:
+        cfg = OmegaConf.merge(cfg, OmegaConf.from_dotlist(overrides))
+        logger.info(f"{_GREEN}⚙️  Applied {len(overrides)} override(s): {overrides}{_RESET}")
 
     logger.info(f"{_GREEN}✅ Config loaded from task yaml{_RESET}")
     return cfg

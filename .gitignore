@@ -170,5 +170,10 @@ outputs/
 tmp/
 checkpoints/
 /data
+/experiments/libero/config.yaml
+/60/
+/None/
+/configs/data/_stats_cache/
+/dataset_stats_*.json
 # local-only setup scratch notes (may contain machine-specific/internal paths)
 ENV_SETUP_NOTES.md

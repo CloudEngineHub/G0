@@ -6,6 +6,7 @@
 #
 # Options:
 #   --output_dir DIR        Root output dir (default: outputs/<ckpt_basename>)
+#   --task_config YAML      Task config for runs without .hydra/config.yaml
 #   --port PORT             Server port (default: 12345)
 #   --num_trials N          Trials per task (default: 10)
 #   --num_parallel N        Parallel envs per client (default: 5)
@@ -13,6 +14,7 @@
 #   --max_batch_size N      Server max batch (default: 30)
 #   --max_wait_ms N         Server max wait ms (default: 2000)
 #   --env_resolution N      Camera resolution (default: 256)
+#   --ensemble              Enable temporal ensemble across overlapping predictions
 #   --save_videos           Save rollout videos
 #   --suites SUITES         Space-separated suite names (default: libero_goal libero_spatial libero_object libero_10)
 #   Any additional key=value pairs are forwarded to the server as Hydra overrides
@@ -27,6 +29,7 @@ set -euo pipefail
 # ── Parse args ──
 CKPT_PATH=""
 OUTPUT_DIR=""
+TASK_CONFIG=""
 PORT=12345
 NUM_TRIALS=50
 NUM_PARALLEL=10
@@ -34,6 +37,7 @@ NUM_STEPS_WAIT=20
 MAX_BATCH_SIZE=30
 MAX_WAIT_MS=1000
 ENV_RESOLUTION=256
+ENSEMBLE=false
 SAVE_VIDEOS=false
 SUITES=(libero_goal libero_spatial libero_object libero_10)
 OVERRIDES=()
@@ -41,6 +45,7 @@ OVERRIDES=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --output_dir)   OUTPUT_DIR="$2"; shift 2 ;;
+        --task_config)  TASK_CONFIG="$2"; shift 2 ;;
         --port)         PORT="$2"; shift 2 ;;
         --num_trials)   NUM_TRIALS="$2"; shift 2 ;;
         --num_parallel) NUM_PARALLEL="$2"; shift 2 ;;
@@ -48,6 +53,7 @@ while [[ $# -gt 0 ]]; do
         --max_batch_size) MAX_BATCH_SIZE="$2"; shift 2 ;;
         --max_wait_ms)  MAX_WAIT_MS="$2"; shift 2 ;;
         --env_resolution) ENV_RESOLUTION="$2"; shift 2 ;;
+        --ensemble)     ENSEMBLE=true; shift ;;
         --save_videos)  SAVE_VIDEOS=true; shift ;;
         --suites)       read -ra SUITES <<< "$2"; shift 2 ;;
         *=*)            OVERRIDES+=("$1"); shift ;;
@@ -63,8 +69,8 @@ done
 
 if [[ -z "$CKPT_PATH" ]]; then
     echo "Usage: bash scripts/run/eval_libero.sh <ckpt_path> [options]" >&2
-    echo "  --output_dir, --port, --num_trials, --num_parallel, --num_steps_wait," >&2
-    echo "  --max_batch_size, --max_wait_ms, --save_videos, --suites" >&2
+    echo "  --output_dir, --task_config, --port, --num_trials, --num_parallel, --num_steps_wait," >&2
+    echo "  --max_batch_size, --max_wait_ms, --ensemble, --save_videos, --suites" >&2
     exit 1
 fi
 
@@ -82,6 +88,7 @@ echo "=============================================="
 echo " LIBERO Batch Evaluation"
 echo "=============================================="
 echo " Checkpoint:    $CKPT_PATH"
+echo " Task config:   ${TASK_CONFIG:-<from .hydra/config.yaml>}"
 echo " Output dir:    $OUTPUT_DIR"
 echo " Server:        $SERVER_URI"
 echo " Suites:        ${SUITES[*]}"
@@ -91,6 +98,7 @@ echo " Steps wait:    $NUM_STEPS_WAIT"
 echo " Max batch:     $MAX_BATCH_SIZE"
 echo " Max wait ms:   $MAX_WAIT_MS"
 echo " Env resolution: $ENV_RESOLUTION"
+echo " Ensemble:      $ENSEMBLE"
 echo " Save videos:   $SAVE_VIDEOS"
 echo " Overrides:     ${OVERRIDES[*]}"
 echo "=============================================="
@@ -109,14 +117,25 @@ cd "$PROJECT_ROOT"
 # ── Start server in background ──
 echo ""
 echo "[1/3] Starting batched policy server on port $PORT ..."
+SERVER_CONFIG_ARGS=()
+if [[ -n "$TASK_CONFIG" ]]; then
+    SERVER_CONFIG_ARGS+=(--task_config "$TASK_CONFIG")
+fi
+SERVER_ENSEMBLE_ARGS=()
+if [[ "$ENSEMBLE" == "true" ]]; then
+    SERVER_ENSEMBLE_ARGS+=(--ensemble)
+fi
+
 python scripts/serve_policy_batched.py \
     --ckpt_path "$CKPT_PATH" \
+    "${SERVER_CONFIG_ARGS[@]}" \
     --host 0.0.0.0 \
     --port "$PORT" \
     eval_embodiment=libero \
     --action_steps 10 \
     --max_batch_size "$MAX_BATCH_SIZE" \
     --max_wait_ms "$MAX_WAIT_MS" \
+    "${SERVER_ENSEMBLE_ARGS[@]}" \
     "${OVERRIDES[@]}" \
     &> "$OUTPUT_DIR/server.log" &
 SERVER_PID=$!
@@ -194,7 +213,7 @@ wait "$SERVER_PID" 2>/dev/null || true
 echo ""
 echo "[3/3] Generating summary ..."
 
-python - <<'PYTHON_SCRIPT' "$OUTPUT_DIR" "${SUITES[*]}"
+python - <<'PYTHON_SCRIPT' "$OUTPUT_DIR" "${SUITES[*]}" "$CKPT_PATH"
 import json
 import sys
 import os
@@ -202,6 +221,7 @@ from pathlib import Path
 
 output_dir = Path(sys.argv[1])
 suite_names = sys.argv[2].split()
+ckpt_path = Path(sys.argv[3]).resolve()
 
 all_suite_results = {}
 per_task_rows = []
@@ -288,7 +308,7 @@ print("=" * 60)
 
 # ── Save structured summary ──
 summary = {
-    "ckpt_path": str(output_dir),
+    "ckpt_path": str(ckpt_path),
     "suites": all_suite_results,
     "grand_successes": grand_successes,
     "grand_total": grand_total,

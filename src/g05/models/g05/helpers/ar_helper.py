@@ -494,6 +494,14 @@ class ARHelper:
         cur_hidden = last_hidden  # [B, d_vlm], hidden that predicts the next token
         token_history = None
         generated_ids = []
+        finished = torch.zeros(bsz, dtype=torch.bool, device=device)
+        first_stop_positions = torch.full((bsz,), -1, dtype=torch.long, device=device)
+        # Keep rectangular outputs without allowing already-finished rows to resume
+        # generation. EOS is preferable because downstream text/action decoders
+        # already treat it as harmless sequence padding.
+        finished_fill_id = eos_id
+        if finished_fill_id is None:
+            finished_fill_id = next(iter(stop_ids), 0)
         pbar = None
         if verbose:
             try:
@@ -510,19 +518,32 @@ class ARHelper:
                 logger.warning("tqdm not installed, verbose=True has no effect")
         t_start = time.perf_counter()
 
-        for _ in range(max_new_tokens):
+        for step in range(max_new_tokens):
             # 1. Sample next token from current hidden (always [B, 1, d_vlm] into decode)
             cur_hidden_3d = (
                 cur_hidden.unsqueeze(1) if cur_hidden.dim() == 2 else cur_hidden[:, -1:, :]
             )
             logits = model.vlm.decode(cur_hidden_3d)  # [B, 1, V]
-            next_token = self._sample(
+            sampled_token = self._sample(
                 logits[:, -1, :], prev_tokens=token_history, **sampling_kwargs
+            )
+            next_token = torch.where(
+                finished,
+                torch.full_like(sampled_token, finished_fill_id),
+                sampled_token,
             )
             generated_ids.append(next_token)
 
-            # 2. Stop check: the stop token counts as generated but is not committed to KV.
-            if all(int(next_token[b]) in stop_ids for b in range(bsz)):
+            # 2. Per-sample stop check. A stop token counts as generated but is not
+            # committed to that row's logical cache. Other rows may continue, so
+            # finished rows receive masked padding slots to preserve rectangular KV.
+            is_stop = torch.zeros_like(finished)
+            for stop_id in stop_ids:
+                is_stop |= next_token == stop_id
+            newly_finished = (~finished) & is_stop
+            first_stop_positions[newly_finished] = step + 1
+            finished |= newly_finished
+            if bool(finished.all()):
                 if pbar is not None:
                     pbar.update(1)
                 break
@@ -535,7 +556,8 @@ class ARHelper:
                     [token_history, next_token.unsqueeze(1)],
                     dim=1,
                 )
-            _token_idx = self._assign_token_index(next_token).unsqueeze(1)
+            _token_idx = self._assign_token_index(next_token)
+            _token_idx = _token_idx.masked_fill(finished, 0).unsqueeze(1)
             attention_mask = torch.cat([attention_mask, _token_idx], dim=1)
 
             # 4. Forward next_token -> new hidden + append to KV cache.
@@ -550,6 +572,8 @@ class ARHelper:
             _cache_kwargs = (
                 {"kv_cache": vlm_kv} if isinstance(vlm_kv, _SKV) else {"past_key_values": vlm_kv}
             )
+            frozen_sparse_states = self._snapshot_sparse_states(vlm_kv, finished)
+            previous_hidden = cur_hidden
             new_hidden, vlm_kv = model.vlm(
                 inputs_embeds=token_embeds,
                 attention_mask=step_mask,
@@ -559,8 +583,14 @@ class ARHelper:
                 mixture_name="vlm",
                 **_cache_kwargs,
             )
+            self._restore_sparse_states(vlm_kv, frozen_sparse_states)
             kv_len += 1
-            cur_hidden = new_hidden[:, -1, :]  # [B, d_vlm]
+            new_last_hidden = new_hidden[:, -1, :]
+            cur_hidden = torch.where(
+                finished.unsqueeze(1),
+                previous_hidden,
+                new_last_hidden,
+            )
 
             if pbar is not None:
                 elapsed = time.perf_counter() - t_start
@@ -576,6 +606,16 @@ class ARHelper:
             pbar.set_postfix({"tok/s": f"{tps:.1f}"})
             pbar.close()
 
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "Batched AR early-stop: steps=%d/%d, first_stop_positions=%s, "
+                "unfinished=%d",
+                len(generated_ids),
+                max_new_tokens,
+                first_stop_positions.detach().cpu().tolist(),
+                int((~finished).sum().item()),
+            )
+
         if not generated_ids:
             result = {"generated_ids": torch.zeros(bsz, 0, dtype=torch.long, device=device)}
         else:
@@ -583,9 +623,46 @@ class ARHelper:
         if return_kv_cache:
             result["past_key_values"] = vlm_kv
             result["attention_mask"] = attention_mask
-            # Extract a single hidden: keep [B, d] if not forwarded; otherwise take the last position.
+            # Extract a single hidden: keep [B, d] if not forwarded; otherwise
+            # take the last position.
             result["last_hidden"] = cur_hidden if cur_hidden.dim() == 2 else cur_hidden[:, -1, :]
         return result
+
+    @staticmethod
+    def _snapshot_sparse_states(cache, frozen_rows: torch.Tensor):
+        """Copy hybrid-cache state rows that padding forwards must not mutate."""
+        # Do not branch on frozen_rows.any(): that would add a device-to-host
+        # synchronization to every AR token. Empty row selections are valid and
+        # cheap before the first sample finishes.
+        if not isinstance(cache, _SKV):
+            return None
+
+        snapshots = {}
+        for attr in ("conv_states", "recurrent_states"):
+            states = getattr(cache, attr)
+            snapshots[attr] = {
+                layer_idx: state[frozen_rows].clone()
+                for layer_idx, state in states.items()
+                if state is not None
+            }
+        return frozen_rows.clone(), snapshots
+
+    @staticmethod
+    def _restore_sparse_states(cache, snapshot) -> None:
+        """Restore GatedDeltaNet state for rows that had already terminated."""
+        if snapshot is None:
+            return
+        if not isinstance(cache, _SKV):
+            raise TypeError("Sparse state snapshot requires SparseKVCache output")
+
+        frozen_rows, snapshots = snapshot
+        for attr, saved_states in snapshots.items():
+            states = getattr(cache, attr)
+            for layer_idx, saved in saved_states.items():
+                state = states.get(layer_idx)
+                if state is None:
+                    continue
+                state[frozen_rows] = saved
 
     # ------------------------------------------------------------------
     # BAR inference: per-sample loop aligned with legacy _forward_infer_discrete
