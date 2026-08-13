@@ -1,7 +1,7 @@
 # GalaxeaVLA：G0.5 视觉-语言-动作模型
 
 [![项目主页](https://img.shields.io/badge/Project%20Page-000000?style=for-the-badge&logo=github)](https://opengalaxea.github.io/G05/)
-[![论文](https://img.shields.io/badge/Paper-8A2BE2?style=for-the-badge&logo=arxiv)](https://opengalaxea.github.io/G05/Galaxea_G0_5.pdf)
+[![论文](https://img.shields.io/badge/Paper-8A2BE2?style=for-the-badge&logo=arxiv)](https://arxiv.org/abs/2608.11739)
 [![视频](https://img.shields.io/badge/Videos-FF0000?style=for-the-badge&logo=youtube)](https://opengalaxea.github.io/G05/videos/introduction_g05.mp4)
 [![Hugging Face](https://img.shields.io/badge/Hugging%20Face-FF6B35?style=for-the-badge&logo=huggingface)](https://huggingface.co/OpenGalaxea/G05)
 
@@ -14,6 +14,8 @@
 
 
 ## 📢 最新动态
+
+[2026 年 8 月 12 日] 我们的 G0.5 论文 [**G0.5: One Autoregressive Stream for Robot Reasoning and Action**](https://arxiv.org/abs/2608.11739) 已在 arXiv 上发布。
 
 [2026 年 7 月 11 日] 我们在 [experiments/r1pro](experiments/r1pro) 中新增 **R1 Pro** 真机零样本推理部署入口，使用与 R1 Lite 零样本部署相同的 [`g05-base` 预训练权重](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-base)。
 
@@ -42,7 +44,7 @@
 
 **G0.5** 是 Galaxea 面向通用机器人控制的预训练自回归视觉-语言-动作模型。G0.5 没有仅把 VLM 用作独立动作专家的视觉语言编码器，而是保留 VLM 作为执行器：单个 transformer decoder 在统一的自回归流中生成推理 token 和动作 token，并使用同一个 next-token prediction 目标。
 
-G0.5 技术报告中的核心思路：
+[**G0.5: One Autoregressive Stream for Robot Reasoning and Action**](https://arxiv.org/abs/2608.11739) 论文中的核心思路：
 
 1. **统一的自回归 VLA**
    - G0.5 以多视角 RGB 观测、本体标识、自然语言任务指令和机器人本体状态作为条件输入。
@@ -449,11 +451,14 @@ python -c "import torch, g05; print(torch.__version__); print(g05.__file__)"
 如果使用我们的数据集或模型，请引用：
 
 ```bibtex
-@article{galaxea2026g05,
-  title={Galaxea G0.5 Technical Report},
-  author={Galaxea Team},
+@misc{liu2026g05autoregressivestreamrobot,
+  title={G0.5: One Autoregressive Stream for Robot Reasoning and Action},
+  author={Yicheng Liu and Zibin Dong and Baijun Ye and Tianyuan Yuan and Tao Jiang and Anqi Yang and Shicheng Cao and Haonan Liu and Yue Sun and Zihan Guo and Xiao Liu and Ke Dong and Changxun Pan and Chenru Wu and Tailai Cheng and Xiaoshu Ren and Xinlei Zhang and Jianning Cui and Zijie Zhao and Haoyu Zhang and Kaiming Xu and Haodong Yang and Bowen Zhang and Jiahui Niu and Shaoting Zhu and Shiduo Zhang and Hang Zhao},
   year={2026},
-  url={https://opengalaxea.github.io/G05/Galaxea_G0_5.pdf}
+  eprint={2608.11739},
+  archivePrefix={arXiv},
+  primaryClass={cs.RO},
+  url={https://arxiv.org/abs/2608.11739}
 }
 ```
 

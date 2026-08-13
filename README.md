@@ -1,7 +1,7 @@
 # GalaxeaVLA: G0.5 Vision-Language-Action Model
 
 [![Project Page](https://img.shields.io/badge/Project%20Page-000000?style=for-the-badge&logo=github)](https://opengalaxea.github.io/G05/)
-[![Paper](https://img.shields.io/badge/Paper-8A2BE2?style=for-the-badge&logo=arxiv)](https://opengalaxea.github.io/G05/Galaxea_G0_5.pdf)
+[![Paper](https://img.shields.io/badge/Paper-8A2BE2?style=for-the-badge&logo=arxiv)](https://arxiv.org/abs/2608.11739)
 [![Videos](https://img.shields.io/badge/Videos-FF0000?style=for-the-badge&logo=youtube)](https://opengalaxea.github.io/G05/videos/introduction_g05.mp4)
 [![Hugging Face](https://img.shields.io/badge/Hugging%20Face-FF6B35?style=for-the-badge&logo=huggingface)](https://huggingface.co/OpenGalaxea/G05)
 
@@ -14,6 +14,8 @@
 
 
 ## 📢 News
+
+[Aug 12, 2026] Our G0.5 paper, [**G0.5: One Autoregressive Stream for Robot Reasoning and Action**](https://arxiv.org/abs/2608.11739), is now available on arXiv.
 
 [Jul 11, 2026] We add an **G0.5** **R1 Pro** real-robot zero-shot inference deployment entrypoint under [experiments/r1pro](experiments/r1pro), using the same [`g05-base` pretrained checkpoint](https://huggingface.co/OpenGalaxea/G05/tree/main/g05-base) as the R1 Lite zero-shot deployment.
 
@@ -42,7 +44,7 @@
 
 **G0.5** is Galaxea's pretrained autoregressive vision-language-action model for general-purpose robot control. Instead of using the VLM only as a vision-language encoder for a separate action expert, G0.5 keeps the VLM as the actor: a single transformer decoder generates reasoning tokens and action tokens in one unified autoregressive stream under the same next-token prediction objective.
 
-Key ideas from the G0.5 technical report:
+Key ideas from [**G0.5: One Autoregressive Stream for Robot Reasoning and Action**](https://arxiv.org/abs/2608.11739):
 
 1. **Unified autoregressive VLA**
    - G0.5 conditions on multi-view RGB observations, an embodiment identifier, natural-language task instruction, and robot proprioceptive state.
@@ -457,11 +459,14 @@ This project builds upon prior work from the open source community. The implemen
 If you use our dataset or models, please cite:
 
 ```bibtex
-@article{galaxea2026g05,
-  title={Galaxea G0.5 Technical Report},
-  author={Galaxea Team},
+@misc{liu2026g05autoregressivestreamrobot,
+  title={G0.5: One Autoregressive Stream for Robot Reasoning and Action},
+  author={Yicheng Liu and Zibin Dong and Baijun Ye and Tianyuan Yuan and Tao Jiang and Anqi Yang and Shicheng Cao and Haonan Liu and Yue Sun and Zihan Guo and Xiao Liu and Ke Dong and Changxun Pan and Chenru Wu and Tailai Cheng and Xiaoshu Ren and Xinlei Zhang and Jianning Cui and Zijie Zhao and Haoyu Zhang and Kaiming Xu and Haodong Yang and Bowen Zhang and Jiahui Niu and Shaoting Zhu and Shiduo Zhang and Hang Zhao},
   year={2026},
-  url={https://opengalaxea.github.io/G05/Galaxea_G0_5.pdf}
+  eprint={2608.11739},
+  archivePrefix={arXiv},
+  primaryClass={cs.RO},
+  url={https://arxiv.org/abs/2608.11739}
 }
 ```
 
